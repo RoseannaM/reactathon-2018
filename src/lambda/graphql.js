@@ -17,6 +17,7 @@ var url = "https://data.continental75.hasura-app.io/v1/query";
 
 function getUser(dbToken, userToken, cb) {
   request({
+    url: url,
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -35,6 +36,7 @@ function getUser(dbToken, userToken, cb) {
 
 function addUser(dbToken, user, userToken, callback) {
   request({
+    url: url,
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -46,10 +48,12 @@ function addUser(dbToken, user, userToken, callback) {
         table:'oauth-tokens',
         objects:[
           { user: user, token: userToken }
-        ]
+        ],
+        returning: ['user', 'token']
       }
     })
   }, function(error, response, body) {
+    console.log(error, response, body);
     if (error) {
       callback(error);
     }
@@ -143,8 +147,28 @@ const schema = new GraphQLSchema({
 exports.handler = function(event, context, cb) {
   console.log(event);
   var access_token = event.queryStringParameters.code;
+  var bearer = event.headers.Authorization && event.headers.Authorization.split(' ')[1];
 
-  if (!access_token) {
+  if (bearer) {
+    async.waterfall([
+      function (callback) {
+        getUser(hasura_database_password, bearer, callback);
+      }, function (response, callback) {
+        console.log(response);
+        callback();
+      }, function (response, callback) {
+        graphql(schema, event.queryStringParameters.query)
+          .then(
+            result => cb(null, {statusCode: 200, body: JSON.stringify(result)}),
+            err => cb(err)
+          );
+    }], function (error) {
+      if (error) {
+        // Something wrong has happened.
+        return cb(JSON.stringify(error));
+      }
+    });
+  } else if (!access_token) {
     return cb(null, {
       isBase64Encoded: false,
       statusCode: 302,
@@ -153,29 +177,34 @@ exports.handler = function(event, context, cb) {
       },
       body: 'Hello World'
     });
+  } else {
+    async.waterfall([
+      function(callback) {
+        introspect(eventbrite_client_token, eventbrite_client_key, access_token, callback);
+      },
+      function(response, callback) {
+        console.log(response);
+        addUser(hasura_database_password, 'username', response.access_token, callback);
+      },
+      function(response, callback) {
+        console.log(response);
+        return cb(null, {
+          isBase64Encoded: false,
+          statusCode: 302,
+          headers: {
+            'Location': '/',
+            'Bearer': response.token
+          },
+          body: 'Hello World'
+        })
+      }
+    ], function (error) {
+      if (error) {
+        // Something wrong has happened.
+        return cb(JSON.stringify(error));
+      }
+    });
   }
-
-  async.waterfall([
-    function(callback) {
-      introspect(eventbrite_client_token, eventbrite_client_key, access_token, callback);
-    },
-    function(response, callback) {
-      console.log(response);
-      addUser(hasura_database_password, 'username', response.access_token, callback);
-    },
-    function(response, callback) {
-      graphql(schema, event.queryStringParameters.query)
-        .then(
-          result => cb(null, {statusCode: 200, body: JSON.stringify(result)}),
-          err => cb(err)
-        );
-    }
-  ], function (error) {
-    if (error) {
-      // Something wrong has happened.
-      return cb(JSON.stringify(error));
-    }
-  });
 };
 
 
