@@ -1,19 +1,42 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from "react";
+import { ApolloProvider } from "react-apollo";
+import { client } from "./apollo-client";
+import { MuiThemeProvider } from "material-ui/styles";
+
+import { BrowserRouter, Route } from "react-router-dom";
+import { Page1 } from "./pages/page1";
+import { Page2 } from "./pages/page2";
+import { EventStart } from "./pages/event-start";
+import { Event } from "./pages/event";
+import { Landing } from "./pages/landing";
+import { Login } from "./pages/login";
+import { Organizer } from "./pages/organizer-view";
+import { theme } from "./theme.js";
+import { EventListPage } from "./pages/event-list-page";
 
 class App extends Component {
   render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
-        </header>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
-      </div>
+      <MuiThemeProvider theme={theme}>
+        <ApolloProvider client={client}>
+          <BrowserRouter>
+            <div className="App">
+              <style>
+                @import
+                url('https://fonts.googleapis.com/css?family=IBM+Plex+Serif');
+              </style>
+              <Route path="/" exact component={Landing} />
+              <Route path="/page1" component={Page1} />
+              <Route path="/page2" component={Page2} />
+              <Route path="/event-start" component={EventStart} />
+              <Route path="/event" component={Event} />
+              <Route path="/organizer" component={Organizer} />
+              <Route path="/login" component={Login} />
+              <Route path="/event-list" component={EventListPage} />
+            </div>
+          </BrowserRouter>
+        </ApolloProvider>
+      </MuiThemeProvider>
     );
   }
 }

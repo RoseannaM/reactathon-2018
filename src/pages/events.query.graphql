@@ -1,0 +1,10 @@
+query events {
+  ownedEvents {
+    id
+    title
+  }
+  joinedEvents {
+    id
+    title
+  }
+}

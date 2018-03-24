@@ -25,7 +25,7 @@ function getUser(dbToken, userToken, cb) {
   }, cb);
 }
 
-function addUser(dbToken, user, userToken, cb) {
+function addUser(dbToken, user, userToken, callback) {
   request({
     method: 'POST',
     headers: {

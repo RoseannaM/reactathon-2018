@@ -1,0 +1,17 @@
+type Query {
+  ownedEvents: [Event!]!
+  joinedEvents: [Event!]!
+  event(id: ID!): Event
+}
+
+type Mutation {
+  startEvent(id: ID!): Event
+  endEvent(id: ID!): Event
+  requestToStream(id: ID!): Event
+}
+
+type Event {
+  id: ID!
+  title: String!
+  accessToken: String
+}
