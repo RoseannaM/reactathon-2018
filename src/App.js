@@ -8,6 +8,7 @@ import { Page2 } from "./pages/page2";
 import { EventStart } from "./pages/event-start";
 import { Landing } from "./pages/landing";
 import { Login } from "./pages/login";
+import { EventListPage } from "./pages/event-list-page";
 
 class App extends Component {
   render() {
@@ -20,6 +21,7 @@ class App extends Component {
             <Route path="/page2" component={Page2} />
             <Route path="/event-start" component={EventStart} />
             <Route path="/login" component={Login} />
+            <Route path="/event-list" component={EventListPage} />
           </div>
         </BrowserRouter>
       </ApolloProvider>

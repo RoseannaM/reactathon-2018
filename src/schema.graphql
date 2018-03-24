@@ -1,5 +1,6 @@
 type Query {
-  events(filter: EventsFilter): [Event!]!
+  ownedEvents: [Event!]!
+  joinedEvents: [Event!]!
   event(id: ID!): Event
 }
 
@@ -9,13 +10,8 @@ type Mutation {
   requestToStream(id: ID!): Event
 }
 
-enum EventsFilter {
-  ALL
-  OWNER
-  MEMBER
-}
-
 type Event {
   id: ID!
+  title: String!
   accessToken: String
 }
