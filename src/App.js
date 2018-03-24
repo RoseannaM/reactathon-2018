@@ -5,6 +5,7 @@ import { Page1 } from "./pages/page1";
 import { Page2 } from "./pages/page2";
 import { EventStart } from "./pages/EventStart";
 import { Landing } from "./pages/Landing";
+import { Login } from "./pages/login";
 
 class App extends Component {
   render() {
@@ -15,6 +16,7 @@ class App extends Component {
           <Route path="/page1" component={Page1} />
           <Route path="/page2" component={Page2} />
           <Route path="/event-start" component={EventStart} />
+          <Route path="/login" component={Login} />
         </div>
       </BrowserRouter>
     );

@@ -22,6 +22,11 @@ export class Landing extends Component {
             Event start
           </Button>
         </Link>
+        <Link to="/login">
+          <Button variant="raised" color="primary">
+            Login
+          </Button>
+        </Link>
       </React.Fragment>
     );
   }
