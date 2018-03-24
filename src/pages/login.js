@@ -1,11 +1,15 @@
 import React, { Component } from "react";
-// import styled from "styled-components";
+import styled from "styled-components";
 import netlifyIdentity from "netlify-identity-widget";
 
-// const Widget = styled.div`
-//   color: green;
-//   background-color: purple;
-// `;
+import Button from "material-ui/Button";
+
+const Widget = styled.div`
+  
+`
+const Loginbutton = styled.button `
+    color: blue;
+`
 
 export class Login extends Component {
   constructor() {
@@ -20,18 +24,10 @@ export class Login extends Component {
   }
 
   render() {
-    return (
-      <div className="App">
-        <div className="App-header">
-          <h2>Welcome to React</h2>
-        </div>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
-        <div>
-          <button onClick={this.handleLogIn}>Log in with netlify</button>
-        </div>
-      </div>
+    return ( 
+    <Widget>
+      <Button onClick={this.handleLogIn}>Log in with netlify</Button>
+    </Widget>
     );
   }
 }
