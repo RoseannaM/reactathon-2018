@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import styled from "styled-components";
 import { NavBar } from "../components/nav-bar";
+import { Layout, LayoutLeft, LayoutRight } from "../components/layout";
+import { StreamCard } from "../components/stream-card";
 
 const White = styled.div`
   margin: 0;
@@ -10,32 +12,28 @@ const White = styled.div`
   color: black;
 `;
 
-const Layout = styled.div`display: flex;`;
-const LayoutLeft = styled.div`
+const ProposedStream = styled.div`
+  padding: 20px;
   display: flex;
-  height: 100%;
-  flex-grow: 1;
-  border: 1px solid white;
+  flex-direction: column;
 `;
-const LayoutRight = styled.div`
-  display: flex;
-  transition: width 200ms;
-  width: ${props => (props.isOpen ? "30%" : "0%")};
-  overflow: hidden;
-  height: 100%;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid white;
-`;
+
+const StreamItemWrapper = styled.div``;
 
 export class Organizer extends Component {
   render() {
+    const streamInfo = [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }];
+
     return (
       <White>
         <NavBar />
         <Layout>
           <LayoutLeft>a</LayoutLeft>
-          <LayoutRight>Card list</LayoutRight>
+          <LayoutRight isOpen={true}>
+            <ProposedStream>
+              {streamInfo.map(({ id }) => <StreamCard key={id} />)}
+            </ProposedStream>
+          </LayoutRight>
         </Layout>
       </White>
     );

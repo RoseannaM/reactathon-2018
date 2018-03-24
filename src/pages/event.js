@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import styled from "styled-components";
+import { Layout, LayoutLeft, LayoutRight } from "../components/layout";
 
 const Black = styled.div`
   margin: 0;
@@ -7,24 +8,6 @@ const Black = styled.div`
   width: 100vw;
   height: 100vh;
   color: white;
-`;
-
-const Layout = styled.div`display: flex;`;
-const LayoutLeft = styled.div`
-  display: flex;
-  height: 100%;
-  flex-grow: 1;
-  border: 1px solid white;
-`;
-const LayoutRight = styled.div`
-  display: flex;
-  transition: width 200ms;
-  width: ${props => (props.isOpen ? "30%" : "0%")};
-  overflow: hidden;
-  height: 100%;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid white;
 `;
 
 export class Event extends Component {

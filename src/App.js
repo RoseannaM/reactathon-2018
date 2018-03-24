@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { ApolloProvider } from "react-apollo";
 import { client } from "./apollo-client";
-import { MuiThemeProvider, createMuiTheme } from "material-ui/styles";
+import { MuiThemeProvider } from "material-ui/styles";
 
 import { BrowserRouter, Route } from "react-router-dom";
 import { Page1 } from "./pages/page1";
@@ -12,6 +12,7 @@ import { Landing } from "./pages/landing";
 import { Login } from "./pages/login";
 import { Organizer } from "./pages/organizer-view";
 import { theme } from "./theme.js";
+import { EventListPage } from "./pages/event-list-page";
 
 class App extends Component {
   render() {
@@ -31,6 +32,7 @@ class App extends Component {
               <Route path="/event" component={Event} />
               <Route path="/organizer" component={Organizer} />
               <Route path="/login" component={Login} />
+              <Route path="/event-list" component={EventListPage} />
             </div>
           </BrowserRouter>
         </ApolloProvider>
