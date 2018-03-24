@@ -1,12 +1,13 @@
 import React, { Component } from "react";
 import styled from "styled-components";
+import { NavBar } from "../components/nav-bar";
 
-const Black = styled.div`
+const White = styled.div`
   margin: 0;
-  background: black;
+  background: white;
   width: 100vw;
   height: 100vh;
-  color: white;
+  color: black;
 `;
 
 const Layout = styled.div`display: flex;`;
@@ -27,31 +28,16 @@ const LayoutRight = styled.div`
   border: 1px solid white;
 `;
 
-export class Event extends Component {
-  constructor() {
-    super();
-    this.state = {
-      isOpen: false
-    };
-
-    window.addEventListener("keydown", e => {
-      if (e.keyCode === 13) {
-        //TODO fix
-        this.setState({
-          isOpen: !this.state.isOpen
-        });
-      }
-    });
-  }
-
+export class Organizer extends Component {
   render() {
     return (
-      <Black>
+      <White>
+        <NavBar />
         <Layout>
           <LayoutLeft>a</LayoutLeft>
-          <LayoutRight isOpen={this.state.isOpen}>Card list</LayoutRight>
+          <LayoutRight>Card list</LayoutRight>
         </Layout>
-      </Black>
+      </White>
     );
   }
 }

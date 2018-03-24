@@ -11,6 +11,7 @@
     "graphql-tag": "^2.8.0",
     "graphql-tools": "^2.23.1",
     "material-ui": "next",
+    "material-ui-icons": "^1.0.0-beta.36",
     "netlify-identity-widget": "^1.4.11",
     "react": "^16.2.0",
     "react-apollo": "^2.1.0",
