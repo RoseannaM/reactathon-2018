@@ -17,5 +17,5 @@ enum EventsFilter {
 
 type Event {
   id: ID!
-  accessToken: string
+  accessToken: String
 }
