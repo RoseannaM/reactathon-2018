@@ -1,7 +1,21 @@
 type Query {
-  events: [Event!]!
+  events(filter: EventsFilter): [Event!]!
+  event(id: ID!): Event
+}
+
+type Mutation {
+  startEvent(id: ID!): Event
+  endEvent(id: ID!): Event
+  requestToStream(id: ID!): Event
+}
+
+enum EventsFilter {
+  ALL
+  OWNER
+  MEMBER
 }
 
 type Event {
   id: ID!
+  accessToken: string
 }
