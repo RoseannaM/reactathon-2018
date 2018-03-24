@@ -16,7 +16,7 @@ export const EventPage = compose(
   graphql(eventQuery, {
     options: props => ({
       variables: {
-        id: props.match.id
+        id: props.match.params.id
       }
     })
   }),
