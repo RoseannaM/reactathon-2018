@@ -22,6 +22,11 @@ class App extends Component {
               Page 2
             </Button>
           </Link>
+          <Link to="/login">
+            <Button variant="raised" color="primary">
+              Login
+            </Button>
+          </Link>
 
           <Route path="/page1" component={Page1} />
           <Route path="/page2" component={Page2} />

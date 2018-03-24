@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "material-ui": "next",
+    "netlify-identity-widget": "^1.4.11",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "react-router": "^4.2.0",
