@@ -35,6 +35,7 @@ function getUser(dbToken, userToken, cb) {
 }
 
 function addUser(dbToken, user, userToken, callback) {
+  console.log(user, userToken);
   request({
     url: url,
     method: 'POST',
@@ -124,7 +125,7 @@ function main(event, context, info)
 }
  
 // This method just inserts the user's first name into the greeting message.
-const getGreeting = firstName => `Hello, ${firstName}.`
+const getGreeting = function (firstName) { return `Hello, ${firstName}.` }
 
 // Here we declare the schema and resolvers for the query
 const schema = new GraphQLSchema({
@@ -159,8 +160,8 @@ exports.handler = function(event, context, cb) {
       }, function (response, callback) {
         graphql(schema, event.queryStringParameters.query)
           .then(
-            result => cb(null, {statusCode: 200, body: JSON.stringify(result)}),
-            err => cb(err)
+            function (result) { cb(null, {statusCode: 200, body: JSON.stringify(result)})},
+            function (err) { cb(err) }
           );
     }], function (error) {
       if (error) {
