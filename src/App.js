@@ -3,8 +3,8 @@ import React, { Component } from "react";
 import { BrowserRouter, Route } from "react-router-dom";
 import { Page1 } from "./pages/page1";
 import { Page2 } from "./pages/page2";
-import { EventStart } from "./pages/EventStart";
-import { Landing } from "./pages/Landing";
+import { EventStart } from "./pages/event-start";
+import { Landing } from "./pages/landing";
 import { Login } from "./pages/login";
 
 class App extends Component {
