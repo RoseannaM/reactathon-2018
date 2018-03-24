@@ -4,6 +4,8 @@ import Button from "material-ui/Button";
 import { BrowserRouter, Route, Link } from "react-router-dom";
 import { Page1 } from "./pages/page1";
 import { Page2 } from "./pages/page2";
+import { Login } from "./pages/login";
+
 
 class App extends Component {
   render() {
@@ -23,6 +25,7 @@ class App extends Component {
 
           <Route path="/page1" component={Page1} />
           <Route path="/page2" component={Page2} />
+          <Route path="/login" component={Login} />
         </div>
       </BrowserRouter>
     );
