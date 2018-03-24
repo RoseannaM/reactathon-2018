@@ -12,7 +12,7 @@ const mocks = {
       { id: "foo", title: "Blah" },
       { id: "bar", accessToken: "secret", title: "Blah2" }
     ],
-    event: () => ({ id: "foo" })
+    event: () => ({ id: "foo", title: "blah" })
   }),
   Mutation: () => ({
     startEvent: () => {},

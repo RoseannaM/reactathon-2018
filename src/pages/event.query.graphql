@@ -1,0 +1,7 @@
+query event($id: ID!) {
+  event(id: $id) {
+    id
+    title
+    accessToken
+  }
+}
