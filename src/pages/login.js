@@ -2,7 +2,13 @@ import React, { Component } from "react";
 import styled from "styled-components";
 import netlifyIdentity from 'netlify-identity-widget'
 
-class App extends Component {
+
+const Widget = styled.div`
+  color: green;
+  background-color: purple;
+`;
+
+class Login extends Component {
   constructor() {
     super()
 
@@ -29,7 +35,5 @@ class App extends Component {
         </div>
       </div>
     );
-  }
 }
-
-export default App;
+};
