@@ -1,39 +1,37 @@
 import React, { Component } from "react";
-import styled from "styled-components";
-import netlifyIdentity from 'netlify-identity-widget'
+// import styled from "styled-components";
+import netlifyIdentity from "netlify-identity-widget";
 
+// const Widget = styled.div`
+//   color: green;
+//   background-color: purple;
+// `;
 
-const Widget = styled.div`
-  color: green;
-  background-color: purple;
-`;
-
-class Login extends Component {
+export class Login extends Component {
   constructor() {
-    super()
+    super();
 
-    this.handleLogIn = this.handleLogIn.bind(this)
+    this.handleLogIn = this.handleLogIn.bind(this);
   }
 
-  handleLogIn () {
+  handleLogIn() {
     // You can import the widget into any component and interact with it.
-    netlifyIdentity.open()
+    netlifyIdentity.open();
   }
 
   render() {
     return (
       <div className="App">
         <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
           <h2>Welcome to React</h2>
         </div>
         <p className="App-intro">
           To get started, edit <code>src/App.js</code> and save to reload.
         </p>
         <div>
-          <button onClick={this.handleLogIn} >Log in with netlify</button>
+          <button onClick={this.handleLogIn}>Log in with netlify</button>
         </div>
       </div>
     );
+  }
 }
-};
