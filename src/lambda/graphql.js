@@ -35,7 +35,7 @@ function getUser(dbToken, userToken, cb) {
 }
 
 function addUser(dbToken, user, userToken, callback) {
-  console.log(user, userToken);
+  console.log('user info', user, userToken);
   request({
     url: url,
     method: 'POST',
@@ -202,7 +202,11 @@ exports.handler = function(event, context, cb) {
     ], function (error) {
       if (error) {
         // Something wrong has happened.
-        return cb(JSON.stringify(error));
+        return cb(null, {
+          isBase64Encoded: false,
+          statusCode: 500,
+          body: JSON.stringify(error)
+        });
       }
     });
   }
