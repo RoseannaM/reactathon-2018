@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import "./App.css";
 
 import Button from "material-ui/Button";
 import { BrowserRouter, Route, Link } from "react-router-dom";
