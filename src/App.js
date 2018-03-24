@@ -6,7 +6,6 @@ import { MuiThemeProvider } from "material-ui/styles";
 import { BrowserRouter, Route } from "react-router-dom";
 import { Page1 } from "./pages/page1";
 import { Page2 } from "./pages/page2";
-import { EventStart } from "./pages/event-start";
 import { Event } from "./pages/event";
 import { Landing } from "./pages/landing";
 import { Login } from "./pages/login";
@@ -28,7 +27,6 @@ class App extends Component {
               <Route path="/" exact component={Landing} />
               <Route path="/page1" component={Page1} />
               <Route path="/page2" component={Page2} />
-              <Route path="/event-start" component={EventStart} />
               <Route path="/event" component={Event} />
               <Route path="/organizer" component={Organizer} />
               <Route path="/login" component={Login} />
