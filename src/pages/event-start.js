@@ -1,8 +1,6 @@
 import React, { Component } from "react";
 import styled from "styled-components";
 
-import { Spotlight } from "../components/spotlight";
-
 const Black = styled.div`
   margin: 0;
   background: black;
