@@ -19,9 +19,14 @@ type Event {
 
 type Session {
   id: ID!
-  requests: [User!]
+  requests: [Request!]
   accessToken: String
   stream: ID
+}
+
+type Request {
+  session: Session!
+  user: User!
 }
 
 type User {

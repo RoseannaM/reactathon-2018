@@ -7,6 +7,7 @@ export const LayoutLeft = styled.div`
   flex-grow: 1;
   padding: 20px 40px;
   box-sizing: border-box;
+  border: 1px dashed black;
 `;
 
 export const LayoutRight = styled.div`
@@ -16,4 +17,13 @@ export const LayoutRight = styled.div`
   height: 100%;
   padding: 20px 40px;
   box-sizing: border-box;
+  border: 1px dashed black;
+`;
+
+export const LayoutMiddle = styled.div`
+  width: 80vw;
+  padding: 0 10vw;
+  height: 100%;
+  box-sizing: border-box;
+  border: 1px dashed black;
 `;

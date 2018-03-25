@@ -7,7 +7,6 @@ import { BrowserRouter, Route } from "react-router-dom";
 import { Page1 } from "./pages/page1";
 import { Page2 } from "./pages/page2";
 import { Event } from "./pages/event";
-import { EventPage } from "./pages/event-page";
 import { Landing } from "./pages/landing";
 import { Login } from "./pages/login";
 import { Organizer } from "./pages/organizer-view";
@@ -56,8 +55,7 @@ class App extends Component {
               <Route path="/" exact component={Landing} />
               <Route path="/page1" component={Page1} />
               <Route path="/page2" component={Page2} />
-              <Route path="/event" exact component={Event} />
-              <Route path="/event/:id" component={EventPage} />
+              <Route path="/event/:id" component={Event} />
               <Route path="/organizer" component={Organizer} />
               <Route path="/login" component={Login} />
               <Route path="/event-list" component={EventListPage} />
