@@ -10,7 +10,34 @@ import { Event } from "./pages/event";
 import { Landing } from "./pages/landing";
 import { Login } from "./pages/login";
 
+import netlifyIdentity from "netlify-identity-widget";
+import {loginUser, logoutUser} from "./identityActions";
+
 class App extends Component {
+
+  state = {user: null}
+
+  componentDidMount() {
+    const user = localStorage.getItem("currentCoolUser");
+
+    if (user) {
+      this.setState({user: JSON.parse(user)});
+    } else {
+      loginUser();
+    }
+
+    netlifyIdentity.on("login", (user) => this.setState({user}, loginUser()));
+    netlifyIdentity.on("logout", () => this.setState({user: null}, logoutUser()));
+  }
+
+  handleLogIn = () => {
+    netlifyIdentity.open();
+  }
+
+  handleLogOut = () => {
+    netlifyIdentity.logout();
+  }
+
   render() {
     return (
       <ApolloProvider client={client}>
@@ -26,6 +53,7 @@ class App extends Component {
             <Route path="/event-start" component={EventStart} />
             <Route path="/event" component={Event} />
             <Route path="/login" component={Login} />
+            
           </div>
         </BrowserRouter>
       </ApolloProvider>

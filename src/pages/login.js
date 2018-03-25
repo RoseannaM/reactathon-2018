@@ -3,31 +3,46 @@ import styled from "styled-components";
 import netlifyIdentity from "netlify-identity-widget";
 
 import Button from "material-ui/Button";
+import { ActionAssignmentTurnedIn } from "material-ui";
+import { withRouter } from "react-router-dom";
 
 const Widget = styled.div`
   
-`
-const Loginbutton = styled.button `
-    color: blue;
+
 `
 
 export class Login extends Component {
   constructor() {
     super();
+    
+    let loggedIn = false;
 
-    this.handleLogIn = this.handleLogIn.bind(this);
+    netlifyIdentity.on("login", login => loggedIn = true);
+
+    if (loggedIn === true) {
+      console.log(true);
+      netlifyIdentity.close();
+      this.props.history.push("/");
+    }
+    else {
+      netlifyIdentity.on("close", () => netlifyIdentity.open())
+    }
   }
 
-  handleLogIn() {
-    // You can import the widget into any component and interact with it.
+  componentDidMount(){
     netlifyIdentity.open();
   }
+
+  
 
   render() {
     return ( 
     <Widget>
-      <Button onClick={this.handleLogIn}>Log in with netlify</Button>
+      <Button>Log in with netlify</Button>
     </Widget>
     );
   }
 }
+
+export default withRouter(Login);
+
