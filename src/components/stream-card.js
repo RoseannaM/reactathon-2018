@@ -23,6 +23,8 @@ export const StagedStreamCardWrapper = styled.div`
 
   box-shadow: 0 0 0 1px rgba(20, 11, 47, 0.05),
     0 2px 16px -2px rgba(0, 0, 0, 0.1);
+
+  margin-bottom: 20px;
 `;
 
 export const StagedStreamCardInner = styled.div`
@@ -38,7 +40,11 @@ export const StagedStreamCard = props => (
     <StagedStreamCardInner>{props.children}</StagedStreamCardInner>
     <StreamActions>
       <Tooltip id="tooltip-top-start" title="Promote stream" placement="right">
-        <IconButton aria-label="Promote" style={{ color: "white" }}>
+        <IconButton
+          onClick={this.props.onPromote()}
+          aria-label="Promote"
+          style={{ color: "white" }}
+        >
           <StarIcon />
         </IconButton>
       </Tooltip>
