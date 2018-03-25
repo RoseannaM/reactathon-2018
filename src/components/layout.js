@@ -22,7 +22,7 @@ export const LayoutRight = styled.div`
 
 export const LayoutMiddle = styled.div`
   width: 80vw;
-  padding: 0 10vw;
+  margin: 0 10vw;
   height: 100%;
   box-sizing: border-box;
   border: 1px dashed black;
