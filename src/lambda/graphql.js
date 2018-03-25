@@ -22,8 +22,8 @@ var url = "https://data.continental75.hasura-app.io/v1/query";
 var openTokClient = new OpenTok(opentokApiKey, opentokApiSecret);
 
 var graphqlHeaders = {
-  'Access-Control-Allow-Origin': 'sad-mccarthy.netlify.com,localhost,http://localhost:3000',
-  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+  'Access-Control-Allow-Origin': 'http://localhost:3000',
+  'Access-Control-Allow-Methods': 'POST,GET',
   'Access-Control-Allow-Credentials': 'true'
 };
 
