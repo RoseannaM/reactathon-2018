@@ -215,7 +215,7 @@ function getEventbriteInfo(token, path, query, callback) {
 
 function mapEvents (events) {
   if (Array.isArray(events)) {
-    return response.events.map(function (ev) {
+    return events.map(function (ev) {
       return {
         id: ev.id,
         title: ev.name.html,
