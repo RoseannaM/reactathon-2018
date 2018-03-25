@@ -1,7 +1,10 @@
 import React, { Component } from "react";
 import { compose, graphql } from "react-apollo";
 import eventsQuery from "./events.query.graphql";
+import { Link } from "react-router-dom";
 import styled from "styled-components";
+import Button from 'material-ui/Button';
+import AddIcon from 'material-ui-icons/Add';
 import EventCardList from "../components/event-card-list";
 import EventCard from "../components/event-card";
 import { Header } from "../components/header";
@@ -17,6 +20,10 @@ const White = styled.div`
   height: 100vh;
 `;
 
+const styledBtn = {
+  margin: "5px"
+}
+
 
 class EventListPageView extends Component {
   render() {
@@ -27,13 +34,19 @@ class EventListPageView extends Component {
           <LayoutMiddle>
             <EventCardList title="Owned Events">
               {this.props.data.ownedEvents.map(event => (
-                <EventCard key={event.id} event={event} />
+                <EventCard key={event.id} title={event.title} />
               ))}
+            <EventCard title="Create event" href="https://www.eventbrite.com/create" />
             </EventCardList>
             <EventCardList title="Joined Events">
               {this.props.data.joinedEvents.map(event => (
-                <EventCard key={event.id} event={event} />
+                <EventCard key={event.id} title={event.title} href="#"/>
               ))}
+              {/* <a href="/event" class="btn btn-primary btn-lg active" role="button">
+              <Button style={styledBtn} size="small" variant="raised" color="primary" >
+                Create Event
+              </Button>
+              </a> */}
             </EventCardList>
           </LayoutMiddle>
         </Layout>
