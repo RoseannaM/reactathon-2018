@@ -32,6 +32,10 @@ const Intro = styled.div`margin-bottom: 30px;`;
 
 class EventListPageView extends Component {
   render() {
+    if (!this.props.data.ownedEvents || !this.props.data.joinedEvents) {
+      console.log(this.props.data)
+      return null;
+    }
     return (
       <White>
         <Header />
