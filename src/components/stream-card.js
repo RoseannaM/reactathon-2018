@@ -17,8 +17,8 @@ const blink = keyframes`
 `;
 
 export const StagedStreamCardWrapper = styled.div`
-  width: 800px;
-  height: 600px;
+  width: 200px;
+  height: 150px;
   position: relative;
 
   box-shadow: 0 0 0 1px rgba(20, 11, 47, 0.05),
