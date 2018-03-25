@@ -5,8 +5,8 @@ import typeDefs from "./schema.graphql";
 const mocks = {
   Query: () => ({
     ownedEvents: () => [
-      { id: "foo", title: "Blah" }
-      // { id: "bar", accessToken: "secret", title: "Blah2" },
+      { id: "foo", title: "Blah" },
+      { id: "bar", accessToken: "secret", title: "Blah2" },
       // { id: "jj", title: "ss" },
       // { id: "hv", accessToken: "secret", title: "gg" },
       // { id: "fr55ssf", title: "wowowowowoowowowow dogggggeee expo" },

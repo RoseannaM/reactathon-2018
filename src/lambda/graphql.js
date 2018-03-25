@@ -98,7 +98,33 @@ function createSession(session, event, callback) {
       objects:[
         { event_id: event, session: session, title: 'Something' }
       ],
-      returning: ['event_id', 'session']
+      returning: ['event_id', 'session', 'id']
+    }
+  }, callback);
+}
+
+function setActiveStream(eventId, streamId, callback) {
+  dbRequest({
+    type:'update',
+    args:{
+      table:'events',
+      "$set": {"stream": streamId },
+      where: {
+        id: id
+      }
+    }
+  }, callback);
+}
+
+function createRequest(request, callback) {
+  dbRequest({
+    type:'insert',
+    args:{
+      table:'request',
+      objects:[
+        { event: request.event, user: request.user, camera: request.cameraSession, screen: request.screenSession }
+      ],
+      returning: ['event', 'user', 'camera', 'screen']
     }
   }, callback);
 }
@@ -194,16 +220,15 @@ function mapEvents (events) {
         id: ev.id,
         title: ev.name.html,
         description: ev.description.html,
-        start: ev.start.utc,
+        startingTime: ev.start.utc,
       };
     });
   } else {
-    var ev = events;
     return {
-      id: ev.id,
-      title: ev.name.html,
-      description: ev.description.html,
-      start: ev.start.utc,
+      id: events.id,
+      title: events.name.html,
+      description: events.description.html,
+      startingTime: events.start.utc,
     };
   }
 }
@@ -271,32 +296,77 @@ type Query {
 type Mutation {
   startEvent(id: ID!): Event
   endEvent(id: ID!): Event
-  requestToStream(id: ID!): Event
+  requestToStream(id: ID!): Request
   selectStream(sessionId: ID!, userId: ID!): Event
 }
 
 type Event {
   id: ID!
   title: String!
+  startingTime: String!
+  description: String!
   session: Session
+  stream: ID
+  requests: [Request!]
 }
 
 type Session {
   id: ID!
-  requests: [Request!]
   accessToken: String
   stream: ID
 }
 
 type Request {
-  session: Session!
+  cameraSession: Session!
+  screenSession: Session!
   user: User!
 }
 
 type User {
   id: ID!
 }
+
 `);
+
+function getEvent (userToken, id, final_callback) {
+  let event, session;
+  async.waterfall([
+    function (callback) {
+      getEventbriteInfo(context, userToken, '/events/' + id, {}, callback);
+    }, function (response, callback) {
+      event = response;
+      getSessionByEvent(id, callback);
+    }, function (response, callback) {
+      session = response;
+      getRequestsForSession(session.session, callback);
+    }, function (response, callback) {
+       final_callback(null, {
+        id: event.id,
+        title: event.title.html,
+        session: {
+          id: session.session,
+          accessToken: session.accessToken
+        },
+        stream: event.stream,
+        requests: response.map(function (req) {
+          return {
+            cameraSession: {
+              id: req.camera
+            },
+            screenSession: {
+              id: req.screen
+            },
+            user: {
+              id: req.user
+            }
+          };
+        })
+      });
+    }
+  ], function (err) {
+    final_callback(err);
+  });
+}
 
 // The root provides the top-level API endpoints
 var root = {
@@ -335,9 +405,9 @@ var root = {
     return new Promise(function (resolve, reject) {
       async.waterfall([
         function (callback) {
-          getEventbriteInfo(context, userToken, '/events/' + id, {}, callback);
+          getEvent(context.userToken, id, callback);
         }, function (response, callback) {
-          resolve(mapEvents(response));
+          resolve(response);
         }], function (error) { reject(error) });
     });
   },
@@ -346,17 +416,13 @@ var root = {
       async.waterfall([
         function (callback) {
           opentokClient.createSession(function(err, session) {
-            if (err) resolve(err);
+            if (err) reject(err);
             else createSession(session.sessionId, id, callback);
           });
         }, function (response, callback) {
-          resolve({
-            id: id,
-            title: 'dummy',
-            session: {
-              id: session.sessionId
-            }
-          });
+          getEvent(context.userToken, id, callback);
+        }, function (response, callback) {
+          resolve(response);
         }], function (error) { reject(err); });
     });
   },
@@ -364,23 +430,53 @@ var root = {
     return { id: '1234', title: 'dummy' };
   },
   requestToStream: function({id}, context) {
+    var request;
     return new Promise(function (resolve, reject) {
       async.waterfall([
         function (callback) {
-          getEventbriteInfo(context.userToken, '/users/' + context.currentUserId + '/orders', {}, callback);
+        //   getEventbriteInfo(context.userToken, '/users/' + context.currentUserId + '/orders', {}, callback);
+        // }, function (response, callback) {
+        //   for (var order in response.events) {
+        //     if (order.id === id) {
+            getSessionByEvent(id, callback);
+            // }
+          // }
+          // callback('No event found for user ' + context.currentUserId);
         }, function (response, callback) {
-          for (var order in response.events) {
-            if (order.id === id) {
-              return getSessionByEvent(order.event_id, callback);
-            }
+          if (!response || response.length === 0) {
+            reject('No event found for id: ' + id);
           }
-          callback('No event found for user ' + context.currentUserId);
+          request = {
+            event: id,
+            user: currentUserId
+          };
+
+          opentokClient.createSession(function (err, session) {
+            if (err) reject(err);
+            else  {
+              request.cameraSession = session.sessionId;
+              opentokClient.createSession(function (err, session) {
+                if (err) reject(err);
+                else  {
+                  request.screenSession = session.sessionId;
+                  createRequest(request, callback);
+                }
+              });
+            }
+          });
         }, function (response, callback) {
-          var sessionId = response[0].session;
-          var token = opentokClient.generateToken(sessionId);
           resolve({
-            id: response[0].event_id,
-            accessToken: token
+            cameraSession: {
+              accessToken: opentokClient.generateToken(request.cameraSession),
+              id: request.cameraSession
+            },
+            screenSession: {
+              accessToken: opentokClient.generateToken(request.screenSession),
+              id: request.screenSession
+            },
+            user: {
+              id: request.user
+            }
           });
         }], function (err) {
           reject(err);
@@ -394,26 +490,23 @@ var root = {
         function (callback) {
           getEventBySession(sessionId, callback);
         }, function (response, callback) {
-          eventId = response[0].event_id;
-          getRequestsForSession(sessionId, callback);
+          if (!response || response.length === 0) {
+            reject('No event with id ' + sessionId);
+          } else {
+            eventId = response[0].event_id;
+            getRequestsForSession(sessionId, callback);
+          }
         }, function (response, callback) {
-          resolve({
-            statusCode: 200,
-            body: {
-              id: eventId,
-              title: 'shrug',
-              session: {
-                id: sessionId,
-                requests: response.map(req => ({
-                  session: req.session,
-                  user: {
-                    id: req.id
-                  }
-                }))
-              }
-            },
-            headers: graphqlHeadears
-          });
+          for (var request in response) {
+            if (request.user === userId) {
+              return setActiveSession(eventId, request.cameraSession, callback);
+            }
+          }
+          reject('No active request found for ' + userId);
+        }, function (response, callback) {
+          getEvent(context.userToken, eventId, callback);
+        }, function (response, callback) {
+          resolve(response);
         }], function (err) {
           reject(err)
         });
