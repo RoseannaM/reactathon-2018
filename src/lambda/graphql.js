@@ -300,6 +300,11 @@ type Mutation {
   selectStream(sessionId: ID!, userId: ID!): Event
 }
 
+type Session {
+  id: ID!
+  accessToken: String
+}
+
 type Event {
   id: ID!
   title: String!
@@ -308,12 +313,6 @@ type Event {
   session: Session
   stream: ID
   requests: [Request!]
-}
-
-type Session {
-  id: ID!
-  accessToken: String
-  stream: ID
 }
 
 type Request {
