@@ -380,7 +380,9 @@ function getEvent (userToken, id, final_callback) {
         callback(null, {});
       }
     }, function (response, callback) {
-      session.accessToken = response && response[0] && response[0].accessToken;
+      if (session) {
+        session.accessToken = response && response[0] && response[0].accessToken;
+      }
       getRequestsForEvent(id, callback);
     }, function (response, callback) {
       console.log(response);
