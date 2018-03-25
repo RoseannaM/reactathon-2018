@@ -1,5 +1,8 @@
 mutation startEvent($id: ID!) {
   startEvent(id: $id) {
     id
+    session {
+      id
+    }
   }
 }
