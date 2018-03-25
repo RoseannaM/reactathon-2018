@@ -25,7 +25,7 @@ var graphqlHeaders = {
   'Access-Control-Allow-Origin': 'http://localhost:3000',
   'Access-Control-Allow-Methods': 'POST,GET',
   'Access-Control-Allow-Credentials': 'true',
-  'Access-Control-Allow-Headers': 'Content-Type'
+  'Access-Control-Allow-Headers': 'Content-Type,Authorization',
 };
 
 function dbRequest(reqBody, callback) {
@@ -59,7 +59,7 @@ function getUser(userToken, callback) {
       args: {
         table: 'oauth-tokens',
         columns: ['*'],
-        where: { token: { '$eq': userToken }}
+        where: { user: { '$eq': userToken }}
       }
     }, callback);
 }
@@ -186,12 +186,6 @@ function getEventbriteInfo(token, path, query, callback) {
   });
 }
 
-function getEventbriteInfoPromise(token, path, query) {
-  return new Promise(function (resolve) {
-    getEventbriteInfo(token, path, query, resolve);
-  });
-};
-
 function introspect(api_key, api_secret, access_token, username, callback) {
   var body = querystring.stringify({
       code: access_token,
@@ -230,13 +224,14 @@ function oauthDance(api_key, api_secret, access_token, user, final_callback) {
         introspect(eventbrite_client_token, eventbrite_client_key, access_token, username, callback);
       },
       function(response, callback) {
+        getEventbriteUser(response.access_token, callback);
+      },
+      function(response, callback) {
+        addUser(username, response.token, response.id, callback);
+      },
+      function(response, callback) {
         return final_callback(null, {
-          isBase64Encoded: false,
-          statusCode: 302,
-          headers: {
-            'Location': '/',
-            'Bearer': response.token
-          },
+          statusCode: 200,
           body: 'Hello World'
         })
       }], function (error) {
@@ -246,16 +241,16 @@ function oauthDance(api_key, api_secret, access_token, user, final_callback) {
 
 const schema =  buildSchema(`
 type Query {
-  ownedEvents(currentUserId: String!, userToken: String!): [Event!]!
-  joinedEvents(currentUserId: String!, userToken: String!): [Event!]!
-  event(id: ID!, currentUserId: String!, userToken: String!): Event
+  ownedEvents: [Event!]!
+  joinedEvents: [Event!]!
+  event(id: ID!): Event
 }
 
 type Mutation {
-  startEvent(id: ID!, currentUserId: String!, userToken: String!): Event
-  endEvent(id: ID!, currentUserId: String!, userToken: String!): Event
-  requestToStream(id: ID!, currentUserId: String!, userToken: String!): Event
-  selectStream(sessionId: ID!, userId: ID!, currentUserId: String!, userToken: String!): Event
+  startEvent(id: ID!): Event
+  endEvent(id: ID!): Event
+  requestToStream(id: ID!): Event
+  selectStream(sessionId: ID!, userId: ID!): Event
 }
 
 type Event {
@@ -283,25 +278,52 @@ type User {
 
 // The root provides the top-level API endpoints
 var root = {
-  ownedEvents: function ({currentUserId, userToken}) {
+  ownedEvents: function ({}, context) {
+          return [{
+            id: '1234',
+            title: 'dummy'
+          }];
+    // return new Promise(function (resolve) {
+    //   async.waterfall([
+    //     function (callback) {
+    //       // getEventbriteInfo(context.userToken, '/users/' + context.currentUserId + '/ownedEvents', {}, callback);
+    //     // }, function (response, callback) {
+    //       resolve(null, [{
+    //         id: '1234',
+    //         title: 'dummy'
+    //       }]);
+    //     }], function (error) { resolve(error) });
+    // });
+  },
+  joinedEvents: function ({}, context) {
+    return new Promise(function (resolve, reject) {
+      async.waterfall([
+        function (callback) {
+          // getEventbriteInfo(context.userToken, '/users/' + context.currentUserId + '/orders', {}, callback)
+        // }, function (response, callback) {
+          resolve([{
+            id: '1234',
+            title: 'dummy'
+          }]);
+        }], function (error) { reject(error) });
+    });
+  },
+  event: function ({id}, context) {
     return new Promise(function (resolve) {
       async.waterfall([
         function (callback) {
-          getEventbriteInfo(userToken, '/users/' + currentUserId + '/ownedEvents', {}, callback);
+          getEventbriteInfo(context, userToken, '/events/search', {
+            'user.id': context.currentUserId
+          }, callback);
         }, function (response, callback) {
-          resolve(response); // TODO
+          resolve(null, [{
+            id: '1234',
+            title: 'dummy'
+          }]);
         }], function (error) { resolve(error) });
     });
   },
-  joinedEvents: function ({currentUserId, userToken}) {
-    return getEventbriteInfoPromise(userToken, '/users/' + currentUserId + '/orders', {});
-  },
-  event: function ({currentUserId, userToken, id}) {
-    return getEventbriteInfoPromise(userToken, '/events/search', {
-      'user.id': currentUserId
-    });
-  },
-  startEvent: function ({id, currentUserId, userToken}) {
+  startEvent: function ({id}, context) {
     return new Promise(function (resolve) {
       async.waterfall([
         function (callback) {
@@ -310,18 +332,24 @@ var root = {
             else createSession(session.sessionId, id, callback);
           });
         }, function (response, callback) {
-          resolve(response); // TODO properly
+          resolve(null, {
+            id: '1234',
+            title: 'dummy'
+          });
         }], function (error) { resolve(err); });
     });
   },
-  endEvent: function ({id, currentUserId, userToken}) {
-    return true;
+  endEvent: function ({id}, context) {
+    return {
+            id: '1234',
+            title: 'dummy'
+          };
   },
-  requestToStream: function({id, currentUserId, userToken}) {
+  requestToStream: function({id}, context) {
     return new Promise(function (resolve) {
       async.waterfall([
         function (callback) {
-          getEventbriteInfo(userToken, '/users/' + currentUserId + '/orders', {}, callback);
+          getEventbriteInfo(context.userToken, '/users/' + context.currentUserId + '/orders', {}, callback);
         }, function (response, callback) {
           for (var order in response) {
             if (order.event_id === id) {
@@ -329,7 +357,7 @@ var root = {
             }
           }
           callback({
-            statusCode: 404, body: 'No event found for user ' + currentUserId
+            statusCode: 404, body: 'No event found for user ' + context.currentUserId
           });
         }, function (response, callback) {
           var sessionId = response[0].session;
@@ -346,7 +374,7 @@ var root = {
         });
     });
   },
-  selectStream: function ({sessionId, userId, currentUserId, userToken}) {
+  selectStream: function ({sessionId, userId}, context) {
     return new Promise(function (resolve) {
       let eventId;
       async.waterfall([
@@ -380,6 +408,27 @@ var root = {
   }
 }
 
+function getNetlifyUser({url}, bearer, callback) {
+  request({
+    url: url + '/user',
+    headers: {
+      Authorization: bearer
+    }
+  }, function(error, response, body) {
+    console.log(error, response, body);
+    if (error) {
+      callback(error);
+    }
+    else if (response.statusCode != 200) {
+      callback(response);
+    }
+    else {
+      body = typeof body === 'string' ? JSON.parse(body) : body;
+      console.log(body);
+      callback(null, body);
+    }
+  });
+}
 
 exports.handler = function(event, context, cb) {
   console.log(event);
@@ -394,69 +443,71 @@ exports.handler = function(event, context, cb) {
   }
 
   var access_token = event.queryStringParameters.code;
-  var {identity, user} = context.clientContext;
-  user = user || 'nhiggins';
+  var {identity} = context.clientContext;
+  var bearer = event.headers.authorization;
 
-  if (!user && !access_token) {
-    return cb(null, {
-      statusCode: 401,
-      body: 'Missing user'
-    });
-  } else {
-    async.waterfall([
-      function (callback) {
-        getUser(user, callback);
-      }, function (response, callback) {
-        if (access_token && user) {
-          getEventbriteUser(access_token, function(err, data) {
-            if (err) cb(err);
-            else addUser(user, data.token, data.id, function (err, data) {
-              if (err) cb(err);
-              else cb(null, { statusCode: 200 });
+  getNetlifyUser(identity, bearer, function (err, response) {
+    if (err) {
+      return cb(err);
+    }
+
+    console.log(response);
+    var user = response.id;
+
+    if (!user && !access_token) {
+      return cb(null, {
+        statusCode: 401,
+        body: 'Missing user'
+      });
+    } else {
+      async.waterfall([
+        function (callback) {
+          getUser(user, callback);
+        }, function (response, callback) {
+          if (access_token && user) {
+            oauthDance(eventbrite_client_token, eventbrite_client_key, access_token, user, callback);
+          } else if (!access_token && !(response && response[0] && response[0].token)) {
+            var headers = graphqlHeaders;
+            headers.Location = 'https://www.eventbrite.com/oauth/authorize?response_type=code&client_id=' + eventbrite_client_token
+            return cb(null, {
+              isBase64Encoded: false,
+              statusCode: 401,
+              headers: headers,
+              body: headers.Location
             });
-          });
-        } else if (!access_token && (!response || !response[0] || !response[0].token)) {
-          var headers = graphqlHeaders;
-          headers.Location = 'https://www.eventbrite.com/oauth/authorize?response_type=token&client_id=' + eventbrite_client_token
-
+          } else if (response && response[0] && response[0].token) {
+            var context = {
+              userToken: response[0].token,
+              currentUserId: response[0].id
+            }
+            var body = JSON.parse(event.body);
+            graphql(schema, body.query, root, context, body.variables)
+              .then(
+                function (result) { 
+                  console
+                  cb(null, {
+                    statusCode: 200, body: JSON.stringify(result),
+                    headers: graphqlHeaders
+                  })
+                },
+                function (err) { cb(JSON.stringify(err)) }
+              );
+          } else {
+            cb('Missing auth creds');
+          }
+      }], function (error) {
+        if (error) {
+          // Something wrong has happened.
           return cb(null, {
             isBase64Encoded: false,
-            statusCode: 401,
-            headers: headers,
-            body: headers.Location
+            statusCode: 500,
+            headers: graphqlHeaders,
+            body: JSON.stringify(error)
           });
-        } else if (access_token && !(response && response[0] && response[0].token)) {
-          console.log(response);
-          oauthDance(eventbrite_client_token, eventbrite_client_key, access_token, response && response[0] || user, callback);
-        } else if (response && response[0] && response[0].token) {
-          var params = event.queryStringParameters.query;
-          params.userToken = response[0].token;
-          params.currentUserId = response[0].id;
-          console.log(params);
-          graphql(schema, params, root)
-            .then(
-              function (result) { cb(null, {
-                statusCode: 200, body: JSON.stringify(result),
-                headers: graphqlHeaders
-              })
-              },
-              function (err) { cb(JSON.stringify(err)) }
-            );
-        } else {
-          cb('Missing auth creds');
         }
-    }], function (error) {
-      if (error) {
-        // Something wrong has happened.
-        return cb(null, {
-          isBase64Encoded: false,
-          statusCode: 500,
-          headers: graphqlHeaders,
-          body: JSON.stringify(error)
-        });
-      }
-    });
-  }
+      });
+    };
+  });
 };
 
 

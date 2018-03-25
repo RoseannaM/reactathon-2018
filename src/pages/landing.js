@@ -3,13 +3,13 @@ import Button from "material-ui/Button";
 
 import { Link } from "react-router-dom";
 import netlifyIdentity from "netlify-identity-widget";
+window.netlifyIdentity = netlifyIdentity;
+// You must run this once before trying to interact with the widget
+netlifyIdentity.init();
 
 export class Landing extends Component {
-
   render() {
-
     const currentUser = netlifyIdentity.currentUser();
-    console.log(currentUser);
     return (
       <React.Fragment>
         <Link to="/page1">
@@ -27,19 +27,19 @@ export class Landing extends Component {
             Event start
           </Button>
         </Link>
-        {currentUser ?
+        {currentUser ? (
           <Link to="/login">
             <Button variant="raised" color="primary">
               Logout
-          </Button>
-          </Link> :
+            </Button>
+          </Link>
+        ) : (
           <Link to="/login">
             <Button variant="raised" color="primary">
               Login
-        </Button>
+            </Button>
           </Link>
-        }
-        
+        )}
       </React.Fragment>
     );
   }
