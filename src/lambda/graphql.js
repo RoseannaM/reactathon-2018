@@ -21,6 +21,12 @@ var url = "https://data.continental75.hasura-app.io/v1/query";
 
 var openTokClient = new OpenTok(opentokApiKey, opentokApiSecret);
 
+var graphqlHeaders = {
+  'Access-Control-Allow-Origin': 'sad-mccarthy.netlify.com, localhost',
+  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+  'Access-Control-Allow-Credentials': true
+};
+
 function dbRequest(reqBody, callback) {
   request({
     url: url,
@@ -339,9 +345,7 @@ var root = {
               id: response[0].event_id,
               accessToken: token
             },
-            headers: {
-              'Access-Control-Allow-Origin': 'sad-mccarthy.netlify.com'
-            },
+            headers: graphqlHeaders
           });
         }], function (err) {
           resolve(err);
@@ -373,9 +377,7 @@ var root = {
                 }))
               }
             },
-            headers: {
-              'Access-Control-Allow-Origin': 'sad-mccarthy.netlify.com'
-            },
+            headers: graphqlHeadears
           });
         }], function (err) {
           resolve(err)
@@ -395,9 +397,7 @@ exports.handler = function(event, context, cb) {
   if (event.httpMethod === 'OPTIONS') {
     return cb(null, {
       statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': 'sad-mccarthy.netlify.com'
-      },
+      headers: graphqlHeaders
       body: 'Hello World'
     });
   }
@@ -413,13 +413,13 @@ exports.handler = function(event, context, cb) {
         getUser(user, callback);
       }, function (response, callback) {
         if (!access_token && (!response || !response[0] || !response[0].token)) {
+          var headers = graphqlHeaders;
+          headers.Location = 'https://www.eventbrite.com/oauth/authorize?response_type=code&client_id=' + eventbrite_client_token
+
           return cb(null, {
             isBase64Encoded: false,
             statusCode: 302,
-            headers: {
-              'Location': 'https://www.eventbrite.com/oauth/authorize?response_type=code&client_id=' + eventbrite_client_token,
-            'Access-Control-Allow-Origin': 'sad-mccarthy.netlify.com'
-            },
+            headers: headers,
             body: 'Hello World'
           });
         } else if (access_token && !(response && response[0] && response[0].token)) {
@@ -434,9 +434,8 @@ exports.handler = function(event, context, cb) {
             .then(
               function (result) { cb(null, {
                 statusCode: 200, body: JSON.stringify(result),
-                headers: {
-                  'Access-Control-Allow-Origin': 'sad-mccarthy.netlify.com'
-                }})
+                headers: graphqlHeaders
+              })
               },
               function (err) { cb(JSON.stringify(err)) }
             );
@@ -449,9 +448,7 @@ exports.handler = function(event, context, cb) {
         return cb(null, {
           isBase64Encoded: false,
           statusCode: 500,
-          headers: {
-            'Access-Control-Allow-Origin': 'sad-mccarthy.netlify.com'
-          },
+          headers: graphqlHeaders,
           body: JSON.stringify(error)
         });
       }
