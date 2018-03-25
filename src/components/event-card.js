@@ -35,7 +35,13 @@ export default class EventCard extends Component {
               {this.props.title}
             </Typography>
             <Typography color="textSecondary">{this.props.date}</Typography>
-            <Typography component="p">{this.props.desc}</Typography>
+            <Typography component="p">
+              {this.props.desc ? (
+                this.props.desc.substring(0, 250) + " ..."
+              ) : (
+                " "
+              )}
+            </Typography>
           </CardContent>
           <CardActions>
             {!this.props.isExternal ? (

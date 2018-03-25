@@ -262,7 +262,12 @@ function getEventbriteInfo(token, path, query, callback) {
 }
 
 function filterOldEvents(events) {
-  return events;
+  // return events;
+  return events.filter(function (event) {
+    var eventDate = Date.parse(event.startingTime);
+    // More than a day since it stared
+    return Date.now() - eventDate < 24 * 60 * 60 * 1000;
+  });
 }
 
 function mapEvents (events) {
@@ -392,19 +397,23 @@ function getFullRequest (request, final_callback) {
       if (err) final_callback(err);
       else {
         console.log(results);
-        final_callback(null, {
-          cameraSession: {
-            id: request.camera,
-            accessToken: results[0][0].accessToken
-          },
-          screenSession: {
-            id: request.screen,
-            accessToken: results[1][0].accessToken
-          },
-          user: {
-            id: request.user
-          }
-        });
+        if (!results[0] || !results[0][0] || !results[1] || !results[1][0]) {
+          final_callback(null, request);
+        } else {
+          final_callback(null, {
+            cameraSession: {
+              id: request.camera,
+              accessToken: results[0][0].accessToken
+            },
+            screenSession: {
+              id: request.screen,
+              accessToken: results[1][0].accessToken
+            },
+            user: {
+              id: request.user
+            }
+          });
+        }
       }
     });
 }
@@ -539,7 +548,7 @@ var root = {
           }
           request = {
             event: id,
-            user: context.currentUserId
+            user: context.currentNetlifyUser
           };
 
           opentokClient.createSession(function (err, session) {
@@ -669,7 +678,7 @@ exports.handler = function(event, context, cb) {
         function (callback) {
           getUser(user, callback);
         }, function (response, callback) {
-          if (access_token && user) {
+          if (access_token && user && !(response && response[0] && response[0].token && response[0].token === access_token.split(' ')[1])) {
             oauthDance(eventbrite_client_token, eventbrite_client_key, access_token, user, callback);
           } else if (!access_token && !(response && response[0] && response[0].token)) {
             var headers = graphqlHeaders;
@@ -683,13 +692,13 @@ exports.handler = function(event, context, cb) {
           } else if (response && response[0] && response[0].token) {
             var context = {
               userToken: response[0].token,
-              currentUserId: response[0].id
+              currentUserId: response[0].id,
+              currentNetlifyUser: response[0].user
             }
             var body = JSON.parse(event.body);
             graphql(schema, body.query, root, context, body.variables)
               .then(
-                function (result) { 
-                  console
+                function (result) {
                   cb(null, {
                     statusCode: 200, body: JSON.stringify(result),
                     headers: graphqlHeaders

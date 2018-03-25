@@ -30,10 +30,16 @@ const Center = styled.div`
   justify-content: center;
 `;
 
-const ImageWrapper = styled.div`margin: 20px 0;`;
-const ImageCaption = styled.div`text-align: center;`;
+const ImageWrapper = styled.div`
+  margin: 20px 0;
+`;
+const ImageCaption = styled.div`
+  text-align: center;
+`;
 
-const Metadata = styled.div`width: 800px;`;
+const Metadata = styled.div`
+  width: 800px;
+`;
 
 export class EventImpl extends Component {
   state = {
@@ -177,23 +183,20 @@ export class EventImpl extends Component {
           <div style={{ display: "none" }}>
             {this.state.camera ? (
               <OTSession
-                style={{ display: "none" }}
                 apiKey="46086982"
                 sessionId={this.state.request.cameraSession.id}
                 token={this.state.request.cameraSession.accessToken}
               >
-                <OTPublisher style={{ display: "none" }} />
+                <OTPublisher />
               </OTSession>
             ) : null}
             {this.state.screen ? (
               <OTSession
-                style={{ display: "none" }}
                 apiKey="46086982"
                 sessionId={this.state.request.screenSession.id}
                 token={this.state.request.screenSession.accessToken}
               >
                 <OTPublisher
-                  style={{ display: "none" }}
                   properties={{
                     videoSource: "screen"
                   }}
