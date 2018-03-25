@@ -90,27 +90,47 @@ function addUser(user, userToken, id, callback) {
   });
 }
 
-function createSession(session, event, callback) {
-  dbRequest({
-    type:'insert',
-    args:{
-      table:'events',
-      objects:[
-        { event_id: event, session: session }
-      ],
-      returning: ['event_id', 'session', 'stream']
-    }
-  }, callback);
+function createSession(session, event, final_callback) {
+  async.waterfall([
+    function(callback) {
+      dbRequest({
+        type:'insert',
+        args:{
+          table:'events',
+          objects:[
+            { event_id: event, session: session }
+          ],
+          returning: ['event_id', 'session', 'stream']
+        }
+      }, callback);
+    }, function (response, callback) {
+      dbRequest({
+        type:'insert',
+        args:{
+          table:'sessions',
+          objects:[
+            {
+              id: session,
+              accessToken: opentokClient.generateToken(session)
+            }
+          ],
+          returning: ['id', 'accessToken']
+        }
+      }, final_callback);
+    }], function (error) {
+      final_callback(error);
+    });
 }
 
 function setActiveStream(eventId, streamId, callback) {
+  console.log(eventId);
   dbRequest({
     type:'update',
     args:{
       table:'events',
       "$set": {"stream": streamId },
       where: {
-        id: id
+        event_id: eventId
       }
     }
   }, callback);
@@ -136,6 +156,17 @@ function getSessionByEvent(event, callback) {
       table:'events',
       columns: ['*'],
       where: { event_id: { '$eq': event }}
+    }
+  }, callback);
+}
+
+function getSession(session, callback) {
+  dbRequest({
+    type:'select',
+    args:{
+      table:'sessions',
+      columns: ['*'],
+      where: { id: { '$eq': session }}
     }
   }, callback);
 }
@@ -203,7 +234,9 @@ function getEventbriteInfo(token, path, query, callback) {
     if (error) {
       callback(error);
     }
-    else if (response.statusCode != 200) {
+    else if (response.statusCode === 404) {
+      callback(null, null);
+    } else if (response.statusCode !== 200) {
       callback(response);
     }
     else {
@@ -214,8 +247,9 @@ function getEventbriteInfo(token, path, query, callback) {
 }
 
 function mapEvents (events) {
+  console.log(events);
   if (Array.isArray(events)) {
-    return events.map(function (ev) {
+    return events.filter(function (ev) { return ev; }).map(function (ev) {
       console.log(ev);
       return {
         id: ev.id,
@@ -334,18 +368,32 @@ function getEvent (userToken, id, final_callback) {
     function (callback) {
       getEventbriteInfo(userToken, '/events/' + id, {}, callback);
     }, function (response, callback) {
-      event = response;
-      getSessionByEvent(id, callback);
+      if (!response) {
+        final_callback(null, null);
+      } else {
+        event = response;
+        getSessionByEvent(id, callback);
+      }
     }, function (response, callback) {
-      console.log('RESPONSE' + JSON.stringify(response));
       session = response[0];
+      if (session) {
+        getSession(session.session, callback);
+      } else {
+        callback(null, {});
+      }
+    }, function (response, callback) {
+      if (session) {
+        session.accessToken = response && response[0] && response[0].accessToken;
+      }
       getRequestsForEvent(id, callback);
     }, function (response, callback) {
-      console.log(response);
+      console.log(event)
       var result = {
         id: event.id,
         title: event.name.html,
-        stream: event.stream,
+        description: event.description && event.description.html,
+        startingTime: event.start && event.start.utc,
+        stream: session.stream,
         requests: response.map(function (req) {
           return {
             cameraSession: {
@@ -393,16 +441,18 @@ var root = {
         function (callback) {
           getEventbriteInfo(context.userToken, '/users/' + context.currentUserId + '/orders', {}, callback)
         }, function (response, callback) {
-          // TODO fix
-          var events = response.orders.map(function (order) {
-            return {
-              id: order.event_id,
-              title: 'asd',
-              description: 'another description',
-              start: 'soon-ish'
-            };
-          });
-          resolve(mapEvents(response.orders));
+          var mapFunc = function (eventId, callback) {
+            console.log(eventId);
+            getEvent(context.userToken, eventId, callback);
+          };
+          async.map(
+            response.orders.map(
+              function (order) { return order.event_id; }),
+              mapFunc,
+              callback
+          );
+        }, function (response, callback) {
+          resolve(response);
         }], function (error) { reject(error) });
     });
   },
@@ -412,7 +462,11 @@ var root = {
         function (callback) {
           getEvent(context.userToken, id, callback);
         }, function (response, callback) {
-          resolve(response);
+          if (response) {
+            resolve(response);
+          } else {
+            reject('No event found with event id ' + id);
+          }
         }], function (error) { reject(error) });
     });
   },
@@ -427,7 +481,11 @@ var root = {
         }, function (response, callback) {
           getEvent(context.userToken, id, callback);
         }, function (response, callback) {
-          resolve(response);
+          if (response) {
+            resolve(response);
+          } else {
+            reject('No event found with event id ' + id);
+          }
         }], function (error) { reject(error); });
     });
   },
@@ -488,6 +546,7 @@ var root = {
         });
     });
   },
+  // userId = streamId
   selectStream: function ({sessionId, userId}, context) {
     return new Promise(function (resolve, reject) {
       let eventId;
@@ -499,19 +558,18 @@ var root = {
             reject('No event with id ' + sessionId);
           } else {
             eventId = response[0].event_id;
-            getRequestsForSession(sessionId, callback);
+            getRequestsForEvent(eventId, callback);
           }
         }, function (response, callback) {
-          for (var request in response) {
-            if (request.user === userId) {
-              return setActiveSession(eventId, request.cameraSession, callback);
-            }
-          }
-          reject('No active request found for ' + userId);
+          setActiveStream(eventId, userId, callback);
         }, function (response, callback) {
           getEvent(context.userToken, eventId, callback);
         }, function (response, callback) {
-          resolve(response);
+          if (response) {
+            resolve(response);
+          } else {
+            reject('No event found with eventId ' + eventId);
+          }
         }], function (err) {
           reject(err)
         });

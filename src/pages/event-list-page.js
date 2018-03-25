@@ -32,6 +32,9 @@ const Intro = styled.div`margin-bottom: 30px;`;
 
 class EventListPageView extends Component {
   render() {
+    const date = "24 March 12:00";
+    const desc = "this is a great time to be alive";
+
     if (!this.props.data.ownedEvents || !this.props.data.joinedEvents) {
       console.log(this.props.data);
       return null;
@@ -50,21 +53,38 @@ class EventListPageView extends Component {
             </Intro>
             <EventCardList title="Owned Events">
               {this.props.data.ownedEvents.map(event => (
-                <EventCard key={event.id} title={event.title} />
+                <EventCard
+                  key={event.id}
+                  title={event.title}
+                  href={"/organizer/" + event.id}
+                  date={event.startingTime || date}
+                  desc={event.description || desc}
+                />
               ))}
               <EventCard
                 title="Create event"
+                isExternal={true}
+                desc="Create a new event on eventbrite"
                 href="https://www.eventbrite.com/create"
               />
             </EventCardList>
             <EventCardList title="Joined Events">
               {this.props.data.joinedEvents.map(event => (
                 <EventCard
+                  isExternal={false}
                   key={event.id}
                   title={event.title}
-                  href={"/event" + event.id}
+                  href={"/event/" + event.id}
+                  date={event.date}
+                  desc={event.desc}
                 />
               ))}
+              <EventCard
+                title="Join event"
+                isExternal={true}
+                desc="Join a new event on Eventbrite"
+                href="https://www.eventbrite.com/join"
+              />
               {/* <a href="/event" class="btn btn-primary btn-lg active" role="button">
               <Button style={styledBtn} size="small" variant="raised" color="primary" >
                 Create Event
