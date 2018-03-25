@@ -31,7 +31,7 @@ export class OAuth extends Component {
           }`
         }
       }
-    );
+    ).then(() => this.props.history.push("/event-list"));
     console.log("1");
   }
 
