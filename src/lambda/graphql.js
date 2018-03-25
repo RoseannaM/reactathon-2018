@@ -90,17 +90,36 @@ function addUser(user, userToken, id, callback) {
   });
 }
 
-function createSession(session, event, callback) {
-  dbRequest({
-    type:'insert',
-    args:{
-      table:'events',
-      objects:[
-        { event_id: event, session: session }
-      ],
-      returning: ['event_id', 'session', 'stream']
-    }
-  }, callback);
+function createSession(session, event, final_callback) {
+  async.waterfall([
+    function(callback) {
+      dbRequest({
+        type:'insert',
+        args:{
+          table:'events',
+          objects:[
+            { event_id: event, session: session }
+          ],
+          returning: ['event_id', 'session', 'stream']
+        }
+      }, callback);
+    }, function (response, callback) {
+      dbRequest({
+        type:'insert',
+        args:{
+          table:'sessions',
+          objects:[
+            {
+              id: session,
+              accessToken: opentokClient.generateToken(session)
+            }
+          ],
+          returning: ['id', 'accessToken']
+        }
+      }, final_callback);
+    }], function (error) {
+      final_callback(error);
+    });
 }
 
 function setActiveStream(eventId, streamId, callback) {
@@ -136,6 +155,17 @@ function getSessionByEvent(event, callback) {
       table:'events',
       columns: ['*'],
       where: { event_id: { '$eq': event }}
+    }
+  }, callback);
+}
+
+function getSession(session, callback) {
+  dbRequest({
+    type:'select',
+    args:{
+      table:'sessions',
+      columns: ['*'],
+      where: { id: { '$eq': session }}
     }
   }, callback);
 }
@@ -339,6 +369,14 @@ function getEvent (userToken, id, final_callback) {
     }, function (response, callback) {
       console.log('RESPONSE' + JSON.stringify(response));
       session = response[0];
+      if (session) {
+        getSession(session.session, callback);
+      } else {
+        callback(null, {});
+      }
+    }, function (response, callback) {
+      console.log('RESPONSE' + JSON.stringify(response));
+      session.accessToken = response && response[0] && response[0].accessToken;
       getRequestsForEvent(id, callback);
     }, function (response, callback) {
       console.log(response);
@@ -402,7 +440,7 @@ var root = {
               start: 'soon-ish'
             };
           });
-          resolve(mapEvents(response.orders));
+          resolve(events);
         }], function (error) { reject(error) });
     });
   },
