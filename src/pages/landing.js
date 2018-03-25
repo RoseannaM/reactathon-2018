@@ -31,7 +31,7 @@ export class Landing extends Component {
 
     const loginButton = (
       <Link to="/login">
-        <Button variant={currentUser ? "default" : "raised"} color="primary">
+        <Button variant={currentUser ? "flat" : "raised"} color="primary">
           {currentUser ? "Logout" : "Login"}
         </Button>
       </Link>
