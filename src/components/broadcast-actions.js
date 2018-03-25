@@ -6,6 +6,7 @@ import MoreVertIcon from "material-ui-icons/MoreVert";
 import PresentToAllIcon from "material-ui-icons/PresentToAll";
 import VideocamIcon from "material-ui-icons/Videocam";
 import styled from "styled-components";
+import { RequestDialog } from "./request-dialog";
 
 const IconWrapper = styled.div`
   padding-top: 5px;
@@ -14,7 +15,16 @@ const IconWrapper = styled.div`
 
 export class BroadcastActions extends React.Component {
   state = {
-    anchorEl: null
+    anchorEl: null,
+    dialogOpen: false
+  };
+
+  handleDialogClickOpen = () => {
+    this.setState({ dialogOpen: true });
+  };
+
+  handleDialogClose = () => {
+    this.setState({ dialogOpen: false });
   };
 
   handleClick = event => {
@@ -46,6 +56,9 @@ export class BroadcastActions extends React.Component {
         >
           <MenuItem
             onClick={() => {
+              if (!this.props.isCameraActive) {
+                this.handleDialogClickOpen();
+              }
               this.handleClose();
               this.props.toggleCamera();
             }}
@@ -56,6 +69,9 @@ export class BroadcastActions extends React.Component {
           </MenuItem>
           <MenuItem
             onClick={() => {
+              if (!this.props.isScreenActive) {
+                this.handleDialogClickOpen();
+              }
               this.handleClose();
               this.props.toggleScreen();
             }}
@@ -65,6 +81,10 @@ export class BroadcastActions extends React.Component {
             </IconWrapper>Broadcast camera
           </MenuItem>
         </Menu>
+        <RequestDialog
+          open={this.state.dialogOpen}
+          handleClose={this.handleDialogClose}
+        />
       </div>
     );
   }
