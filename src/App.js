@@ -10,7 +10,7 @@ import { Event } from "./pages/event";
 import { EventPage } from "./pages/event-page";
 import { Landing } from "./pages/landing";
 import { Login } from "./pages/login";
-import { Organizer } from "./pages/organizer-view";
+import { OrganizerPage } from "./pages/organizer-page";
 import { theme } from "./theme.js";
 import { EventListPage } from "./pages/event-list-page";
 
@@ -28,6 +28,8 @@ class App extends Component {
     } else {
       loginUser();
     }
+
+    console.log(netlifyIdentity.currentUser());
 
     netlifyIdentity.on("login", user => this.setState({ user }, loginUser()));
     netlifyIdentity.on("logout", () =>
@@ -58,7 +60,7 @@ class App extends Component {
               <Route path="/page2" component={Page2} />
               <Route path="/event" exact component={Event} />
               <Route path="/event/:id" component={EventPage} />
-              <Route path="/organizer" component={Organizer} />
+              <Route path="/organizer/:id" component={OrganizerPage} />
               <Route path="/login" component={Login} />
               <Route path="/event-list" component={EventListPage} />
             </div>
