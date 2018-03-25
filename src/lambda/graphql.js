@@ -279,24 +279,28 @@ type User {
 // The root provides the top-level API endpoints
 var root = {
   ownedEvents: function ({}, context) {
-    return new Promise(function (resolve) {
-      async.waterfall([
-        function (callback) {
-          getEventbriteInfo(context.userToken, '/users/' + context.currentUserId + '/ownedEvents', {}, callback);
-        }, function (response, callback) {
-          resolve(null, [{
+          return [{
             id: '1234',
             title: 'dummy'
-          }]);
-        }], function (error) { resolve(error) });
-    });
+          }];
+    // return new Promise(function (resolve) {
+    //   async.waterfall([
+    //     function (callback) {
+    //       // getEventbriteInfo(context.userToken, '/users/' + context.currentUserId + '/ownedEvents', {}, callback);
+    //     // }, function (response, callback) {
+    //       resolve(null, [{
+    //         id: '1234',
+    //         title: 'dummy'
+    //       }]);
+    //     }], function (error) { resolve(error) });
+    // });
   },
   joinedEvents: function ({}, context) {
     return new Promise(function (resolve) {
       async.waterfall([
         function (callback) {
-          getEventbriteInfo(context.userToken, '/users/' + context.currentUserId + '/orders', {}, callback)
-        }, function (response, callback) {
+          // getEventbriteInfo(context.userToken, '/users/' + context.currentUserId + '/orders', {}, callback)
+        // }, function (response, callback) {
           resolve(null, [{
             id: '1234',
             title: 'dummy'
@@ -479,10 +483,12 @@ exports.handler = function(event, context, cb) {
             var body = JSON.parse(event.body);
             graphql(schema, body.query, root, context, body.variables)
               .then(
-                function (result) { cb(null, {
-                  statusCode: 200, body: result,
-                  headers: graphqlHeaders
-                })
+                function (result) { 
+                  console
+                  cb(null, {
+                    statusCode: 200, body: JSON.stringify(result),
+                    headers: graphqlHeaders
+                  })
                 },
                 function (err) { cb(JSON.stringify(err)) }
               );
