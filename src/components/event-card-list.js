@@ -11,20 +11,24 @@ const styles = theme => ({
   root: {
     width: '100%',
     maxWidth: 360,
-    backgroundColor: theme.palette.background.paper,
+    backgroundColor: 'rgba(255, 255, 255, 0)',
   }
 });
 
 const mystyles = {
   cardtitle: {
-    margin: '5px'
+    margin: '5px',
+    color: '#fff',
   },
   cardOuter: {
-    display: 'block',
-    color: 'red',
-    margin: 'auto'
-  }
+    display:  'block',
+    margin: '10px 5px',
+    padding: '10px',
+    borderRadius: '5px',
+    backgroundImage: 'linear-gradient(60deg, rgba(88, 95, 255, 0.82) 20%, rgb(131, 233, 254) 72%)'
 }
+  }
+
 
 export class EventCardList extends Component {
   render() {
@@ -33,7 +37,6 @@ export class EventCardList extends Component {
       <div className={classes.root}>
       <h3 style={mystyles.cardtitle}>{this.props.title}</h3>
         <List component="nav">
-          
         </List>
       </div>
       {this.props.children}</div>);

@@ -12,7 +12,7 @@ const Wrapper = styled.div`
   justify-content: space-between;
   box-sizing: border-box;
   overflow: hidden;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 `;
 
 const Left = styled.div`flex-grow: 1;`;
