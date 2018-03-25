@@ -60,7 +60,6 @@ function getEventbriteUser(userToken, callback) {
 };
 
 function addUser(dbToken, user, userToken, callback) {
-  console.log('user info', user, userToken);
   request({
     url: url,
     method: 'POST',
@@ -101,8 +100,6 @@ function introspect(api_key, api_secret, access_token, callback)
       client_id: api_key,
       grant_type: 'authorization_code'
     });
-
-  console.log(body);
 
   request({
     url: 'https://www.eventbrite.com/oauth/token',
@@ -210,10 +207,18 @@ exports.handler = function(event, context, cb) {
       },
       function(response, callback) {
         console.log(response);
+        return cb(null, {
+          isBase64Encoded: false,
+          statusCode: 302,
+          headers: {
+            'Location': '/',
+            'Bearer': response.token
+          },
+          body: response
+        })
         getEventbriteUser(response.access_token, callback);
       },
       function(response, callback) {
-        console.log('introspection successful');
         console.log(response);
         addUser(hasura_database_password, response.name, response.token, callback);
       },
