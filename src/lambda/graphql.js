@@ -246,6 +246,7 @@ function getEventbriteInfo(token, path, query, callback) {
 }
 
 function mapEvents (events) {
+  console.log(events);
   if (Array.isArray(events)) {
     return events.filter(function (ev) { return ev; }).map(function (ev) {
       console.log(ev);
@@ -385,10 +386,12 @@ function getEvent (userToken, id, final_callback) {
       }
       getRequestsForEvent(id, callback);
     }, function (response, callback) {
-      console.log(response);
+      console.log(event)
       var result = {
         id: event.id,
         title: event.name.html,
+        description: event.description && event.description.html,
+        startingTime: event.start && event.start.utc,
         stream: event.stream,
         requests: response.map(function (req) {
           return {
@@ -438,12 +441,12 @@ var root = {
           getEventbriteInfo(context.userToken, '/users/' + context.currentUserId + '/orders', {}, callback)
         }, function (response, callback) {
           var mapFunc = function (eventId, callback) {
+            console.log(eventId);
             getEvent(context.userToken, eventId, callback);
           };
-
           async.map(
             response.orders.map(
-              function (order) { return order.order_id; }),
+              function (order) { return order.event_id; }),
               mapFunc,
               callback
           );
@@ -554,7 +557,7 @@ var root = {
             reject('No event with id ' + sessionId);
           } else {
             eventId = response[0].event_id;
-            getRequestsForSession(sessionId, callback);
+            getRequestsForEvent(eventId, callback);
           }
         }, function (response, callback) {
           setActiveStream(eventId, usedId, callback);
