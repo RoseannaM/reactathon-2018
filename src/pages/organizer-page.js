@@ -120,8 +120,8 @@ class OrganizerView extends Component {
                         >
                           <SessionView
                             subscriberProperties={{
-                              width: "150px",
-                              height: "100px"
+                              width: "300px",
+                              height: "200px"
                             }}
                             session={request.screenSession}
                           />
@@ -135,8 +135,8 @@ class OrganizerView extends Component {
                         >
                           <SessionView
                             subscriberProperties={{
-                              width: "150px",
-                              height: "100px"
+                              width: "300px",
+                              height: "200px"
                             }}
                             session={request.cameraSession}
                           />
