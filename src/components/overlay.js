@@ -14,7 +14,7 @@ export const PageOverlay = styled.div`
 `;
 
 const Left = styled.div`
-  background: #140e19;
+  background: black;
   width: 50%;
   display: flex;
   flex-direction: column;
@@ -25,7 +25,7 @@ const Left = styled.div`
 `;
 
 const Right = styled.div`
-  background: #140e19;
+  background: black;
   width: 50%;
   display: flex;
   flex-direction: column;

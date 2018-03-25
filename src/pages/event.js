@@ -6,7 +6,7 @@ import { Header } from "../components/header";
 
 const Black = styled.div`
   margin: 0;
-  background: #fff;
+  background: white;
   width: 100vw;
   height: 100vh;
 `;
