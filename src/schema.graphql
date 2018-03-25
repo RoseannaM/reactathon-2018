@@ -8,10 +8,16 @@ type Mutation {
   startEvent(id: ID!): Event
   endEvent(id: ID!): Event
   requestToStream(id: ID!): Event
+  selectStream(eventId: ID!, userId: ID!): Event
 }
 
 type Event {
   id: ID!
   title: String!
   accessToken: String
+  requests: [User!]!
+}
+
+type User {
+  id: ID!
 }
