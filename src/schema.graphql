@@ -7,7 +7,7 @@ type Query {
 type Mutation {
   startEvent(id: ID!): Event
   endEvent(id: ID!): Event
-  requestToStream(id: ID!): Event
+  requestToStream(id: ID!): Request
   selectStream(sessionId: ID!, userId: ID!): Event
 }
 
@@ -17,17 +17,18 @@ type Event {
   startingTime: String!
   description: String!
   session: Session
+  requests: [Request!]
 }
 
 type Session {
   id: ID!
-  requests: [Request!]
   accessToken: String
   stream: ID
 }
 
 type Request {
-  session: Session!
+  cameraSession: Session!
+  screenSession: Session!
   user: User!
 }
 

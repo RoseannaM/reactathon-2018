@@ -1,0 +1,5 @@
+mutation stopEvent($id: ID!) {
+  stopEvent(id: $id) {
+    id
+  }
+}
