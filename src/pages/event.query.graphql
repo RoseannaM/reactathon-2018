@@ -3,6 +3,8 @@ query event($id: ID!) {
     id
     title
     stream
+    startingTime
+    description
     session {
       id
       accessToken
