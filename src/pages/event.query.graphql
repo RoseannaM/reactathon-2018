@@ -1,0 +1,11 @@
+query event($id: ID!) {
+  event(id: $id) {
+    id
+    title
+    session {
+      id
+      stream
+      accessToken
+    }
+  }
+}

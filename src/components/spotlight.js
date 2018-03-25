@@ -1,4 +1,5 @@
 import styled, { keyframes } from "styled-components";
+import React from "react";
 
 const fadeIn = keyframes`
   0% {
@@ -10,7 +11,7 @@ const fadeIn = keyframes`
   }
 `;
 
-export const Spotlight = styled.div`
+export const SpotlightLight = styled.div`
   background-image: radial-gradient(
     circle at top left,
     white 0%,
@@ -22,3 +23,11 @@ export const Spotlight = styled.div`
   height: 500px;
   transform: rotate(45deg);
 `;
+
+export const SpotlightWrapper = styled.div`position: relative;`;
+
+export const Spotlight = () => (
+  <SpotlightWrapper>
+    <SpotlightLight />
+  </SpotlightWrapper>
+);

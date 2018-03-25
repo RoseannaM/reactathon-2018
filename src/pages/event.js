@@ -1,49 +1,28 @@
 import React, { Component } from "react";
 import styled from "styled-components";
-
-import { Spotlight } from "../components/spotlight";
+import { Layout, LayoutLeft, LayoutRight } from "../components/layout";
+import { Overlay } from "../components/overlay";
 
 const Black = styled.div`
   margin: 0;
-  background: black;
+  background: red;
   width: 100vw;
   height: 100vh;
   color: white;
 `;
 
-const Layout = styled.div`display: flex;`;
-const LayoutLeft = styled.div`
+const Center = styled.div`
   display: flex;
+  width: 100%;
   height: 100%;
-  flex-grow: 1;
-  border: 1px solid white;
-`;
-const LayoutRight = styled.div`
-  display: flex;
-  transition: width 200ms;
-  width: ${props => (props.isOpen ? "30%" : "0%")};
-  overflow: hidden;
-  height: 100%;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid white;
-`;
-
-const Title = styled.p`
-  padding: 0;
-  margin: 0;
-  font-size: 100px;
-  color: white;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
-  font-weight: 500;
 `;
 
 export class Event extends Component {
   constructor() {
     super();
     this.state = {
-      isOpen: false
+      isOpen: false,
+      isRevealed: false
     };
 
     window.addEventListener("keydown", e => {
@@ -53,15 +32,22 @@ export class Event extends Component {
           isOpen: !this.state.isOpen
         });
       }
+      if (e.keyCode === 32) {
+        //TODO fix
+        this.setState({
+          isRevealed: !this.state.isRevealed
+        });
+      }
     });
   }
 
   render() {
     return (
       <Black>
+        <Overlay isRevealed={this.state.isRevealed} />
         <Layout>
           <LayoutLeft>a</LayoutLeft>
-          <LayoutRight isOpen={this.state.isOpen}>b</LayoutRight>
+          <LayoutRight isOpen={this.state.isOpen}>Card list</LayoutRight>
         </Layout>
       </Black>
     );
