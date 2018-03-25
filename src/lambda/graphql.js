@@ -213,6 +213,10 @@ exports.handler = function(event, context, cb) {
   var bearer = event.headers.Authorization && event.headers.Authorization.split(' ')[1];
 
   if (bearer) {
+    return getUser(hasura_database_password, bearer, function (err, resp) {
+      console.log(err, resp);
+      cb(err, {statusCode: 200, body: JSON.stringify(resp)});
+    });
     async.waterfall([
       function (callback) {
         getUser(hasura_database_password, bearer, callback);
