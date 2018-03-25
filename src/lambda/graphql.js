@@ -560,7 +560,7 @@ var root = {
             getRequestsForEvent(eventId, callback);
           }
         }, function (response, callback) {
-          setActiveStream(eventId, usedId, callback);
+          setActiveStream(eventId, userId, callback);
         }, function (response, callback) {
           getEvent(context.userToken, eventId, callback);
         }, function (response, callback) {
