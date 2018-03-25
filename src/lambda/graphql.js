@@ -21,6 +21,13 @@ var url = "https://data.continental75.hasura-app.io/v1/query";
 
 var openTokClient = new OpenTok(opentokApiKey, opentokApiSecret);
 
+var graphqlHeaders = {
+  'Access-Control-Allow-Origin': 'http://localhost:3000',
+  'Access-Control-Allow-Methods': 'POST,GET',
+  'Access-Control-Allow-Credentials': 'true',
+  'Access-Control-Allow-Headers': 'Content-Type'
+};
+
 function dbRequest(reqBody, callback) {
   request({
     url: url,
@@ -58,18 +65,17 @@ function getUser(userToken, callback) {
 }
 
 function addUser(user, userToken, id, callback) {
-  if (typeof user === 'string') {
-    dbRequest({
-      type:'insert',
-      args:{
-        table:'oauth-tokens',
-        objects:[
-          { user: user, token: userToken, id: id }
-        ],
-        returning: ['user', 'token', 'id']
-      }
-    }, callback);
-  } else {
+  dbRequest({
+    type:'insert',
+    args:{
+      table:'oauth-tokens',
+      objects:[
+        { user: user, token: userToken, id: id }
+      ],
+      returning: ['user', 'token', 'id']
+    }
+  }, function (err, response) {
+    if (!err) return callback(null, response);
     dbRequest({
       type:'update',
       args:{
@@ -81,7 +87,7 @@ function addUser(user, userToken, id, callback) {
         returning: ['user', 'token', 'id']
       }
     }, callback);
-  }
+  });
 }
 
 function createSession(session, event, callback) {
@@ -227,7 +233,7 @@ function oauthDance(api_key, api_secret, access_token, user, final_callback) {
         getEventbriteUser(response.access_token, callback);
       },
       function(response, callback) {
-        addUser(user, response.token, response.id, callback);
+        addUser(username, response.token, response.id, callback);
       },
       function(response, callback) {
         return final_callback(null, {
@@ -339,9 +345,7 @@ var root = {
               id: response[0].event_id,
               accessToken: token
             },
-            headers: {
-              'Access-Control-Allow-Origin': 'sad-mccarthy.netlify.com'
-            },
+            headers: graphqlHeaders
           });
         }], function (err) {
           resolve(err);
@@ -373,9 +377,7 @@ var root = {
                 }))
               }
             },
-            headers: {
-              'Access-Control-Allow-Origin': 'sad-mccarthy.netlify.com'
-            },
+            headers: graphqlHeadears
           });
         }], function (err) {
           resolve(err)
@@ -388,19 +390,18 @@ var root = {
 exports.handler = function(event, context, cb) {
   console.log(event);
   console.log(context);
-  var access_token = event.queryStringParameters.code;
-  var {identity, user} = context.clientContext;
-  user = user || 'nhiggins';
 
   if (event.httpMethod === 'OPTIONS') {
     return cb(null, {
       statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': 'sad-mccarthy.netlify.com'
-      },
+      headers: graphqlHeaders,
       body: 'Hello World'
     });
   }
+
+  var access_token = event.queryStringParameters.code;
+  var {identity, user} = context.clientContext;
+  user = user || 'nhiggins';
 
   if (!user && !access_token) {
     return cb(null, {
@@ -413,14 +414,14 @@ exports.handler = function(event, context, cb) {
         getUser(user, callback);
       }, function (response, callback) {
         if (!access_token && (!response || !response[0] || !response[0].token)) {
+          var headers = graphqlHeaders;
+          headers.Location = 'https://www.eventbrite.com/oauth/authorize?response_type=code&client_id=' + eventbrite_client_token
+
           return cb(null, {
             isBase64Encoded: false,
-            statusCode: 302,
-            headers: {
-              'Location': 'https://www.eventbrite.com/oauth/authorize?response_type=code&client_id=' + eventbrite_client_token,
-            'Access-Control-Allow-Origin': 'sad-mccarthy.netlify.com'
-            },
-            body: 'Hello World'
+            statusCode: 401,
+            headers: headers,
+            body: headers.Location
           });
         } else if (access_token && !(response && response[0] && response[0].token)) {
           console.log(response);
@@ -430,13 +431,12 @@ exports.handler = function(event, context, cb) {
           params.userToken = response[0].token;
           params.currentUserId = response[0].id;
           console.log(params);
-          graphql(schema, params)
+          graphql(schema, params, root)
             .then(
               function (result) { cb(null, {
                 statusCode: 200, body: JSON.stringify(result),
-                headers: {
-                  'Access-Control-Allow-Origin': 'sad-mccarthy.netlify.com'
-                }})
+                headers: graphqlHeaders
+              })
               },
               function (err) { cb(JSON.stringify(err)) }
             );
@@ -449,9 +449,7 @@ exports.handler = function(event, context, cb) {
         return cb(null, {
           isBase64Encoded: false,
           statusCode: 500,
-          headers: {
-            'Access-Control-Allow-Origin': 'sad-mccarthy.netlify.com'
-          },
+          headers: graphqlHeaders,
           body: JSON.stringify(error)
         });
       }
