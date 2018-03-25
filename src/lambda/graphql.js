@@ -451,7 +451,7 @@ var root = {
               callback
           );
         }, function (response, callback) {
-          resolve(mapEvents(response));
+          resolve(response);
         }], function (error) { reject(error) });
     });
   },
