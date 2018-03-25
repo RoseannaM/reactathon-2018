@@ -237,12 +237,7 @@ function oauthDance(api_key, api_secret, access_token, user, final_callback) {
       },
       function(response, callback) {
         return final_callback(null, {
-          isBase64Encoded: false,
-          statusCode: 302,
-          headers: {
-            'Location': '/',
-            'Bearer': response.token
-          },
+          statusCode: 200,
           body: 'Hello World'
         })
       }], function (error) {
@@ -468,7 +463,7 @@ exports.handler = function(event, context, cb) {
               body: headers.Location
             });
           } else if (response && response[0] && response[0].token) {
-            var params = event.queryStringParameters.query;
+            var params = event.queryStringParameters.query || {};
             params.userToken = response[0].token;
             params.currentUserId = response[0].id;
             console.log(params);
