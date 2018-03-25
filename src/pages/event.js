@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import styled from "styled-components";
-import { Layout, LayoutLeft, LayoutRight } from "../components/layout";
+import { Layout, LayoutMiddle } from "../components/layout";
 import { Overlay } from "../components/overlay";
 import { Header } from "../components/header";
 import { compose, graphql } from "react-apollo";
@@ -9,6 +9,7 @@ import EventCardList from "../components/event-card-list";
 import EventCard from "../components/event-card";
 import withLoadingSpinner from "../components/with-loading-spinner";
 import { OTSession, OTPublisher, OTStreams, OTSubscriber } from "opentok-react";
+import { MainStreamCard } from "../components/stream-card";
 import netlifyIdentity from "netlify-identity-widget";
 
 const Black = styled.div`
@@ -55,13 +56,29 @@ export class EventImpl extends Component {
         token={session.accessToken}
       >
         {session.stream === currentUser.id && this.state.camera ? (
-          <OTPublisher />
+          <OTPublisher
+            properties={{
+              width: "800px",
+              height: "600px"
+            }}
+          />
         ) : null}
         {session.stream === currentUser.id && this.state.screen ? (
-          <OTPublisher videoSource="screen" />
+          <OTPublisher
+            properties={{
+              width: "800px",
+              height: "600px"
+            }}
+            videoSource="screen"
+          />
         ) : null}
         <OTStreams>
-          <OTSubscriber />
+          <OTSubscriber
+            properties={{
+              width: "800px",
+              height: "600px"
+            }}
+          />
         </OTStreams>
       </OTSession>
     ) : null; // waiting image here
@@ -91,12 +108,11 @@ export class EventImpl extends Component {
       <Black>
         <Header />
         <Layout>
-          <LayoutLeft>
+          <LayoutMiddle>
             <button onClick={this.toggleCamera}>Camera</button>
             <button onClick={this.toggleScreen}>Screen</button>
             {this.renderVideo()}
-          </LayoutLeft>
-          <LayoutRight isOpen={this.state.isOpen}>Card list</LayoutRight>
+          </LayoutMiddle>
         </Layout>
         <Overlay isRevealed={this.state.isRevealed} />
       </Black>
