@@ -173,6 +173,7 @@ function getEventbriteInfo(token, path, query, callback) {
     },
     qs: query
   }, function (error, response, body) {
+    console.log(error, response, body);
     if (error) {
       callback(error);
     }
@@ -290,6 +291,7 @@ type User {
 // The root provides the top-level API endpoints
 var root = {
   ownedEvents: function ({}, context) {
+    console.log(context);
     return new Promise(function (resolve, reject) {
       async.waterfall([
         function (callback) {
@@ -482,7 +484,10 @@ exports.handler = function(event, context, cb) {
                     headers: graphqlHeaders
                   })
                 },
-                function (err) { cb(JSON.stringify(err)) }
+                function (err) { 
+                  console.error(err);
+                  cb(JSON.stringify(err));
+                }
               );
           } else {
             cb('Missing auth creds');
