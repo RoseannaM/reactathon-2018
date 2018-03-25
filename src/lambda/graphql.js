@@ -22,7 +22,7 @@ var url = "https://data.continental75.hasura-app.io/v1/query";
 var openTokClient = new OpenTok(opentokApiKey, opentokApiSecret);
 
 var graphqlHeaders = {
-  'Access-Control-Allow-Origin': 'sad-mccarthy.netlify.com, localhost',
+  'Access-Control-Allow-Origin': 'sad-mccarthy.netlify.com,localhost,http://localhost:3000',
   'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
   'Access-Control-Allow-Credentials': true
 };
@@ -397,7 +397,7 @@ exports.handler = function(event, context, cb) {
   if (event.httpMethod === 'OPTIONS') {
     return cb(null, {
       statusCode: 200,
-      headers: graphqlHeaders
+      headers: graphqlHeaders,
       body: 'Hello World'
     });
   }
