@@ -38,7 +38,6 @@ function dbRequest(reqBody, callback) {
     },
     body: JSON.stringify(reqBody)
   }, function(error, response, body) {
-    console.log(error, response, body);
     if (error) {
       callback(error);
     }
@@ -88,6 +87,22 @@ function addUser(user, userToken, id, callback) {
       }
     }, callback);
   });
+}
+
+function createUserSession(session, callback) {
+  dbRequest({
+    type:'insert',
+    args:{
+      table:'sessions',
+      objects:[
+        {
+          id: session,
+          accessToken: opentokClient.generateToken(session)
+        }
+      ],
+      returning: ['id', 'accessToken']
+    }
+  }, callback);
 }
 
 function createSession(session, event, final_callback) {
@@ -246,6 +261,14 @@ function getEventbriteInfo(token, path, query, callback) {
   });
 }
 
+function filterOldEvents(events) {
+  return events.filter(function (event) {
+    var eventDate = Date.parse(event.startingTime);
+    // More than a day since it stared
+    return Date.now() - eventDate > 24 * 60 * 60 * 1000;
+  });
+}
+
 function mapEvents (events) {
   console.log(events);
   if (Array.isArray(events)) {
@@ -362,6 +385,35 @@ type User {
 
 `);
 
+function getFullRequest (request, final_callback) {
+  async.parallel([
+    function (callback) {
+      getSession(request.camera, callback);
+    },
+    function (callback) {
+      getSession(request.screen, callback);
+    }], function (err, results) {
+      if (err) final_callback(err);
+      else {
+        console.log(results);
+        final_callback(null, {
+          cameraSession: {
+            id: request.camera,
+            accessToken: results[0][0].accessToken
+          },
+          screenSession: {
+            id: request.screen,
+            accessToken: results[1][0].accessToken
+          },
+          user: {
+            id: request.user
+          }
+        });
+      }
+    });
+}
+
+
 function getEvent (userToken, id, final_callback) {
   let event, session;
   async.waterfall([
@@ -387,26 +439,15 @@ function getEvent (userToken, id, final_callback) {
       }
       getRequestsForEvent(id, callback);
     }, function (response, callback) {
-      console.log(event)
+      async.map(response, getFullRequest, callback);
+    }, function (response, callback) {
       var result = {
         id: event.id,
         title: event.name.text,
         description: event.description && event.description.text,
         startingTime: event.start && event.start.utc,
         stream: session && session.stream,
-        requests: response.map(function (req) {
-          return {
-            cameraSession: {
-              id: req.camera
-            },
-            screenSession: {
-              id: req.screen
-            },
-            user: {
-              id: req.user
-            }
-          };
-        })
+        requests: response
       };
       if (session) {
         result.session = {
@@ -430,8 +471,7 @@ var root = {
         function (callback) {
           getEventbriteInfo(context.userToken, '/users/' + context.currentUserId + '/owned_events', {}, callback);
         }, function (response, callback) {
-          console.log(response.events);
-          resolve(mapEvents(response.events));
+          resolve(filterOldEvents(mapEvents(response.events)));
         }], function (error) { reject(error) });
     });
   },
@@ -442,7 +482,6 @@ var root = {
           getEventbriteInfo(context.userToken, '/users/' + context.currentUserId + '/orders', {}, callback)
         }, function (response, callback) {
           var mapFunc = function (eventId, callback) {
-            console.log(eventId);
             getEvent(context.userToken, eventId, callback);
           };
           async.map(
@@ -452,7 +491,7 @@ var root = {
               callback
           );
         }, function (response, callback) {
-          resolve(response);
+          resolve(filterOldEvents(response));
         }], function (error) { reject(error) });
     });
   },
@@ -497,44 +536,43 @@ var root = {
     return new Promise(function (resolve, reject) {
       async.waterfall([
         function (callback) {
-        //   getEventbriteInfo(context.userToken, '/users/' + context.currentUserId + '/orders', {}, callback);
-        // }, function (response, callback) {
-        //   for (var order in response.events) {
-        //     if (order.id === id) {
-            getSessionByEvent(id, callback);
-            // }
-          // }
-          // callback('No event found for user ' + context.currentUserId);
+          getSessionByEvent(id, callback);
         }, function (response, callback) {
           if (!response || response.length === 0) {
             reject('No event found for id: ' + id);
           }
           request = {
             event: id,
-            user: context.currentUserId
+            user: context.currentNetlifyUser
           };
 
           opentokClient.createSession(function (err, session) {
             if (err) reject(err);
             else  {
               request.cameraSession = session.sessionId;
-              opentokClient.createSession(function (err, session) {
-                if (err) reject(err);
-                else  {
-                  request.screenSession = session.sessionId;
-                  createRequest(request, callback);
-                }
-              });
+              createUserSession(request.cameraSession, callback);
+            }
+          })
+        }, function (response, callback) {
+          request.cameraToken = response.returning[0].accessToken;
+          opentokClient.createSession(function (err, session) {
+            if (err) reject(err);
+            else  {
+              request.screenSession = session.sessionId;
+              createUserSession(request.screenSession, callback);
             }
           });
         }, function (response, callback) {
+          request.screenToken = response.returning[0].accessToken;
+          createRequest(request, callback);
+        }, function (response, callback) {
           resolve({
             cameraSession: {
-              accessToken: opentokClient.generateToken(request.cameraSession),
+              accessToken: request.cameraToken,
               id: request.cameraSession
             },
             screenSession: {
-              accessToken: opentokClient.generateToken(request.screenSession),
+              accessToken: request.screenToken,
               id: request.screenSession
             },
             user: {
@@ -547,28 +585,20 @@ var root = {
     });
   },
   // userId = streamId
+  // sessionId = eventId
   selectStream: function ({sessionId, userId}, context) {
     return new Promise(function (resolve, reject) {
       let eventId;
       async.waterfall([
         function (callback) {
-          getEventBySession(sessionId, callback);
+          setActiveStream(sessionId, userId, callback);
         }, function (response, callback) {
-          if (!response || response.length === 0) {
-            reject('No event with id ' + sessionId);
-          } else {
-            eventId = response[0].event_id;
-            getRequestsForEvent(eventId, callback);
-          }
-        }, function (response, callback) {
-          setActiveStream(eventId, userId, callback);
-        }, function (response, callback) {
-          getEvent(context.userToken, eventId, callback);
+          getEvent(context.userToken, sessionId, callback);
         }, function (response, callback) {
           if (response) {
             resolve(response);
           } else {
-            reject('No event found with eventId ' + eventId);
+            reject('No event found with eventId ' + sessionId);
           }
         }], function (err) {
           reject(err)
@@ -643,7 +673,7 @@ exports.handler = function(event, context, cb) {
         function (callback) {
           getUser(user, callback);
         }, function (response, callback) {
-          if (access_token && user) {
+          if (access_token && user && !(response && response[0] && response[0].token && response[0].token === access_token.split(' ')[1])) {
             oauthDance(eventbrite_client_token, eventbrite_client_key, access_token, user, callback);
           } else if (!access_token && !(response && response[0] && response[0].token)) {
             var headers = graphqlHeaders;
@@ -657,13 +687,13 @@ exports.handler = function(event, context, cb) {
           } else if (response && response[0] && response[0].token) {
             var context = {
               userToken: response[0].token,
-              currentUserId: response[0].id
+              currentUserId: response[0].id,
+              currentNetlifyUser: response[0].user
             }
             var body = JSON.parse(event.body);
             graphql(schema, body.query, root, context, body.variables)
               .then(
-                function (result) { 
-                  console
+                function (result) {
                   cb(null, {
                     statusCode: 200, body: JSON.stringify(result),
                     headers: graphqlHeaders

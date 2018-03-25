@@ -51,7 +51,7 @@ class EventListPageView extends Component {
                 organizing.
               </Large>
             </Intro>
-            <EventCardList title="Owned Events">
+            <EventCardList title="Organize an event">
               {this.props.data.ownedEvents.map(event => (
                 <EventCard
                   key={event.id}
@@ -68,7 +68,7 @@ class EventListPageView extends Component {
                 href="https://www.eventbrite.com/create"
               />
             </EventCardList>
-            <EventCardList title="Joined Events">
+            <EventCardList title="View an event">
               {this.props.data.joinedEvents.map(event => (
                 <EventCard
                   isExternal={false}

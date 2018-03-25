@@ -27,8 +27,7 @@ export const client = new ApolloClient({
         window.location = error.networkError.bodyText;
       }
     }),
-    // process.env.NODE_ENV === "production"
-    false
+    process.env.NODE_ENV === "production"
       ? createHttpLink({
           uri: "https://sad-mccarthy.netlify.com/.netlify/functions/graphql",
           credentials: "include"
