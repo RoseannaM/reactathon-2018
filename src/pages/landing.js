@@ -25,7 +25,7 @@ export class Landing extends Component {
         <Link to="/event-start">
           <Button variant="raised" color="primary">
             Event start
-          </Button>s
+          </Button>
         </Link>
         {currentUser ?
           <Link to="/login">
