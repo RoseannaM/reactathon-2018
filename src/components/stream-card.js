@@ -66,3 +66,9 @@ export const ActiveStreamCard = props => (
     <ActiveStreamActions>X</ActiveStreamActions>
   </ActiveStreamWrapper>
 );
+
+export const MainStreamCard = styled.div`
+  width: 50vw;
+  height: 50vh;
+  border: 1px solid black;
+`;
