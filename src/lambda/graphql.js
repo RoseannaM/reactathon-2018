@@ -389,7 +389,8 @@ exports.handler = function(event, context, cb) {
             isBase64Encoded: false,
             statusCode: 302,
             headers: {
-              'Location': 'https://www.eventbrite.com/oauth/authorize?response_type=code&client_id=' + eventbrite_client_token
+              'Location': 'https://www.eventbrite.com/oauth/authorize?response_type=code&client_id=' + eventbrite_client_token,
+            'Access-Control-Allow-Origin': 'sad-mccarthy.netlify.com'
             },
             body: 'Hello World'
           });
@@ -403,7 +404,12 @@ exports.handler = function(event, context, cb) {
           console.log(params);
           graphql(schema, params)
             .then(
-              function (result) { cb(null, {statusCode: 200, body: JSON.stringify(result)})},
+              function (result) { cb(null, {
+                statusCode: 200, body: JSON.stringify(result),
+                headers: {
+                  'Access-Control-Allow-Origin': 'sad-mccarthy.netlify.com'
+                }})
+              },
               function (err) { cb(JSON.stringify(err)) }
             );
         } else {
@@ -415,6 +421,9 @@ exports.handler = function(event, context, cb) {
         return cb(null, {
           isBase64Encoded: false,
           statusCode: 500,
+          headers: {
+            'Access-Control-Allow-Origin': 'sad-mccarthy.netlify.com'
+          },
           body: JSON.stringify(error)
         });
       }
