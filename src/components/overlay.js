@@ -7,10 +7,11 @@ export const PageOverlay = styled.div`
   top: 0;
   left: 0;
   width: 100vw;
-  height: 100vw;
+  height: 100vh;
   position: fixed;
   display: flex;
   pointer-events: ${props => (props.isRevealed ? "none" : "auto")};
+  z-index: 1;
 `;
 
 const Left = styled.div`
