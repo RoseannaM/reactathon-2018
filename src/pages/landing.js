@@ -19,30 +19,35 @@ const Center = styled.div`
   flex-direction: column;
 `;
 
+const CallToAction = styled.div`margin: 20px 0;`;
+
 const Hero = styled.div`margin: 20px 0;`;
 
 export class Landing extends Component {
   render() {
     const currentUser = netlifyIdentity.currentUser();
+
+    console.log(currentUser);
+
+    const loginButton = (
+      <Link to="/login">
+        <Button variant={currentUser ? "default" : "raised"} color="primary">
+          {currentUser ? "Logout" : "Login"}
+        </Button>
+      </Link>
+    );
+
+    const startButton = (
+      <Link to="/event-list">
+        <Button variant="raised" color="primary">
+          Start your event now
+        </Button>
+      </Link>
+    );
+
     return (
       <React.Fragment>
-        <Header
-          actions={
-            currentUser ? (
-              <Link to="/login">
-                <Button variant="raised" color="primary">
-                  Logout
-                </Button>
-              </Link>
-            ) : (
-              <Link to="/login">
-                <Button variant="raised" color="primary">
-                  Login
-                </Button>
-              </Link>
-            )
-          }
-        />
+        <Header actions={loginButton} />
         <Center>
           <Title>
             Get ready to <strong>Assemble.</strong>
@@ -56,6 +61,7 @@ export class Landing extends Component {
               in real time for meetups and conferences.
             </Large>
           </div>
+          <CallToAction>{currentUser ? startButton : loginButton}</CallToAction>
         </Center>
       </React.Fragment>
     );
