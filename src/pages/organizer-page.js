@@ -23,9 +23,7 @@ const ProposedStreamList = styled.div`
   flex-direction: column;
 `;
 
-const StreamCardWrapper = styled.div`
-  padding-bottom: 10px;
-`;
+const StreamCardWrapper = styled.div`padding-bottom: 10px;`;
 
 class SessionView extends Component {
   render() {
@@ -36,7 +34,11 @@ class SessionView extends Component {
         token={this.props.session.accessToken}
       >
         <OTStreams>
-          <OTSubscriber />
+          <OTSubscriber
+            properties={{
+              width: "100%"
+            }}
+          />
         </OTStreams>
       </OTSession>
     );

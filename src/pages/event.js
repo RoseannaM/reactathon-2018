@@ -29,8 +29,12 @@ const Center = styled.div`
   justify-content: center;
 `;
 
-const ImageWrapper = styled.div`margin: 20px 0;`;
-const ImageCaption = styled.div`text-align: center;`;
+const ImageWrapper = styled.div`
+  margin: 20px 0;
+`;
+const ImageCaption = styled.div`
+  text-align: center;
+`;
 
 export class EventImpl extends Component {
   state = {
@@ -87,9 +91,9 @@ export class EventImpl extends Component {
             <OTPublisher
               properties={{
                 width: "800px",
-                height: "600px"
+                height: "600px",
+                videoSource: "screen"
               }}
-              videoSource="screen"
             />
           ) : null}
           <OTStreams>
