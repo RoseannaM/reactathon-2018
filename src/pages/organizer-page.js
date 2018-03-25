@@ -109,27 +109,51 @@ class OrganizerView extends Component {
             <Subtitle>Staged streams</Subtitle>
             <ProposedStreamList>
               {session &&
-                event.requests.map(request => (
-                  <StreamCardWrapper key={request.cameraSession.id}>
-                    <Button
-                      variant="raised"
-                      color="primary"
-                      onClick={() =>
-                        this.selectStream(`${request.user.id}-camera`)}
-                    >
-                      Promote
-                    </Button>
-                    <StagedStreamCard>
-                      <SessionView
-                        subscriberProperties={{
-                          width: "150px",
-                          height: "100px"
-                        }}
-                        session={request.cameraSession}
-                      />
-                    </StagedStreamCard>
-                  </StreamCardWrapper>
-                ))}
+                event.requests.map(
+                  request =>
+                    request.user.id ===
+                    "4818b197-0266-43eb-88c5-ac0fcc3731df" ? (
+                      <StreamCardWrapper key={request.screenSession.id}>
+                        <Button
+                          variant="raised"
+                          color="primary"
+                          onClick={() =>
+                            this.selectStream(`${request.user.id}-screen`)}
+                        >
+                          Promote
+                        </Button>
+                        <StagedStreamCard>
+                          <SessionView
+                            subscriberProperties={{
+                              width: "150px",
+                              height: "100px"
+                            }}
+                            session={request.screenSession}
+                          />
+                        </StagedStreamCard>
+                      </StreamCardWrapper>
+                    ) : (
+                      <StreamCardWrapper key={request.cameraSession.id}>
+                        <Button
+                          variant="raised"
+                          color="primary"
+                          onClick={() =>
+                            this.selectStream(`${request.user.id}-camera`)}
+                        >
+                          Promote
+                        </Button>
+                        <StagedStreamCard>
+                          <SessionView
+                            subscriberProperties={{
+                              width: "150px",
+                              height: "100px"
+                            }}
+                            session={request.cameraSession}
+                          />
+                        </StagedStreamCard>
+                      </StreamCardWrapper>
+                    )
+                )}
             </ProposedStreamList>
           </LayoutRight>
         </Layout>
