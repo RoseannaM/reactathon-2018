@@ -6,6 +6,7 @@ import styled from "styled-components";
 import { Link } from "react-router-dom";
 import netlifyIdentity from "netlify-identity-widget";
 import logo from "../images/logo-paint.png";
+import friends from "../images/animals-stand-in.png"
 
 window.netlifyIdentity = netlifyIdentity;
 // You must run this once before trying to interact with the widget
@@ -18,6 +19,20 @@ const Center = styled.div`
   display: flex;
   flex-direction: column;
 `;
+
+const GatheringDiv = styled.div `
+  background-color: #fff;
+  width: 100%;
+  height: 500px;
+  padding-bottom: 30px;
+`
+const TextContainer = styled.div `
+  
+
+`
+const GatheringImg = styled.img `
+  margin: 20px;
+`
 
 const CallToAction = styled.div`margin: 20px 0;`;
 
@@ -62,6 +77,17 @@ export class Landing extends Component {
             </Large>
           </div>
           <CallToAction>{currentUser ? startButton : loginButton}</CallToAction>
+          <GatheringDiv>
+          <GatheringImg src={friends} width="300px" />
+          <Large>
+              Attend a meetup from anywhere. <strong>Assemble</strong> enables team collaboration,<br/>
+              cross geo inclusivity and strengthens connections.
+            </Large>
+            <br/>
+            <h3>harnessing the power of the real time video streaming, we make it easy for you to create and
+              join events.
+            </h3>
+          </GatheringDiv>
         </Center>
       </React.Fragment>
     );
