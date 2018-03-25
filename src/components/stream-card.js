@@ -26,6 +26,9 @@ const ActiveStreamWrapper = styled.div`
   padding-bottom: 75%;
   position: relative;
 
+  box-shadow: 0 0 0 1px rgba(20, 11, 47, 0.05),
+    0 2px 16px -2px rgba(0, 0, 0, 0.1);
+
   &:after {
     box-sizing: border-box;
     animation: ${blink} 1.5s step-end infinite;

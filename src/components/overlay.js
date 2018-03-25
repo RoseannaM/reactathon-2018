@@ -2,6 +2,7 @@ import styled from "styled-components";
 import React, { Component } from "react";
 import { Timer } from "../components/timer";
 import { Title, Subtitle } from "../components/typography";
+import flowerFrog from "../images/flower-frog.svg";
 
 export const PageOverlay = styled.div`
   top: 0;
@@ -42,6 +43,7 @@ const Right = styled.div`
   padding: 40px;
   box-sizing: border-box;
   justify-content: center;
+  align-items: center;
 `;
 
 export class Overlay extends Component {
@@ -58,8 +60,8 @@ export class Overlay extends Component {
           <img
             width="400px"
             height="400px"
-            style={{ border: "1px solid black" }}
-            src=""
+            style={{ filter: "invert(100%)" }}
+            src={flowerFrog}
             alt="Image"
           />
         </Right>
