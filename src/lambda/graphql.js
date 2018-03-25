@@ -83,13 +83,35 @@ function createSession(session, event, callback) {
   }, callback);
 }
 
-function getSession(event, callback) {
+function getSessionByEvent(event, callback) {
   dbRequest({
     type:'select',
     args:{
       table:'events',
       columns: ['*'],
       where: { event_id: { '$eq': event }}
+    }
+  }, callback);
+}
+
+function getEventBySession(session, callback) {
+  dbRequest({
+    type:'select',
+    args:{
+      table:'events',
+      columns: ['*'],
+      where: { session: { '$eq': session }}
+    }
+  }, callback);
+}
+
+function getRequestsForSession(session, callback) {
+  dbRequest({
+    type:'select',
+    args:{
+      table:'requests',
+      columns: ['*'],
+      where: { session: { '$eq': session }}
     }
   }, callback);
 }
@@ -181,6 +203,32 @@ function introspect(api_key, api_secret, access_token, callback) {
   });
 }
 
+function oauthDance(api_key, api_secret, access_token, final_callback) {
+    async.waterfall([
+      function(callback) {
+        introspect(eventbrite_client_token, eventbrite_client_key, access_token, callback);
+      },
+      function(response, callback) {
+        getEventbriteUser(response.access_token, callback);
+      },
+      function(response, callback) {
+        addUser(response.name, response.token, response.id, callback);
+      },
+      function(response, callback) {
+        return final_callback(null, {
+          isBase64Encoded: false,
+          statusCode: 302,
+          headers: {
+            'Location': '/',
+            'Bearer': response.token
+          },
+          body: 'Hello World'
+        })
+      }], function (error) {
+        final_callback(error);
+      });
+}
+
 const schema =  buildSchema(`
 type Query {
   ownedEvents(currentUserId: String!, userToken: String!): [Event!]!
@@ -203,9 +251,14 @@ type Event {
 
 type Session {
   id: ID!
-  requests: [User!]
+  requests: [Request!]
   accessToken: String
   stream: ID
+}
+
+type Request {
+  session: Session!
+  user: User!
 }
 
 type User {
@@ -245,7 +298,7 @@ var root = {
         }, function (response, callback) {
           for (var order in response) {
             if (order.event_id === id) {
-              return getSession(order.event_id, callback);
+              return getSessionByEvent(order.event_id, callback);
             }
           }
           callback({
@@ -266,7 +319,35 @@ var root = {
     });
   },
   selectStream: function ({sessionId, userId, currentUserId, userToken}) {
-    return true;
+    return new Promise(function (resolve) {
+      let eventId;
+      async.waterfall([
+        function (callback) {
+          getEventBySession(sessionId, callback);
+        }, function (response, callback) {
+          eventId = response[0].event_id;
+          getRequestsForSession(sessionId, callback);
+        }, function (response, callback) {
+          callback({
+            statusCode: 200,
+            body: {
+              id: eventId,
+              title: 'shrug',
+              session: {
+                id: sessionId,
+                requests: response.map(req => ({
+                  session: req.session,
+                  user: {
+                    id: req.id
+                  }
+                }))
+              }
+            }
+          });
+        }], function (err) {
+          resolve(err)
+        });
+    });
   }
 }
 
@@ -274,70 +355,43 @@ var root = {
 exports.handler = function(event, context, cb) {
   console.log(event);
   var access_token = event.queryStringParameters.code;
-  var bearer = event.headers.Authorization && event.headers.Authorization.split(' ')[1];
+  var {identity, user} = context.clientContext;
 
-  if (bearer) {
+  if (!user && !access_token) {
+    return cb(null, {
+      statusCode: 401,
+      body: 'Missing user'
+    });
+  } else {
     async.waterfall([
       function (callback) {
         getUser(bearer, callback);
       }, function (response, callback) {
-        return cb(null, {
-          isBase64Encoded: false,
-          statusCode: 200,
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: response
-        });
-      }, function (response, callback) {
-        params = event.queryStringParameters.query;
-        params.userToken = bearer;
-        params.currentUserId = response[0].id;
-        console.log(params);
-        graphql(schema, params)
-          .then(
-            function (result) { cb(null, {statusCode: 200, body: JSON.stringify(result)})},
-            function (err) { cb(JSON.stringify(err)) }
-          );
+        if (!access_token && (!response || !response[0] || !response[0].token)) {
+          return cb(null, {
+            isBase64Encoded: false,
+            statusCode: 302,
+            headers: {
+              'Location': 'https://www.eventbrite.com/oauth/authorize?response_type=code&client_id=' + eventbrite_client_token
+            },
+            body: 'Hello World'
+          });
+        } else if (access_token && (!response || !response[0] || !response[0].token)) {
+          oauthDance(eventbrite_client_token, eventbrite_client_key, access_token, callback);
+        } else if (response && response[0] && response[0].token) {
+          params = event.queryStringParameters.query;
+          params.userToken = response[0].token;
+          params.currentUserId = response[0].id;
+          console.log(params);
+          graphql(schema, params)
+            .then(
+              function (result) { cb(null, {statusCode: 200, body: JSON.stringify(result)})},
+              function (err) { cb(JSON.stringify(err)) }
+            );
+        } else {
+          cb('Missing auth creds');
+        }
     }], function (error) {
-      if (error) {
-        // Something wrong has happened.
-        return cb(JSON.stringify(error));
-      }
-    });
-  } else if (!access_token) {
-    return cb(null, {
-      isBase64Encoded: false,
-      statusCode: 302,
-      headers: {
-        'Location': 'https://www.eventbrite.com/oauth/authorize?response_type=code&client_id=' + eventbrite_client_token
-      },
-      body: 'Hello World'
-    });
-  } else {
-    async.waterfall([
-      function(callback) {
-        introspect(eventbrite_client_token, eventbrite_client_key, access_token, callback);
-      },
-      function(response, callback) {
-        getEventbriteUser(response.access_token, callback);
-      },
-      function(response, callback) {
-        addUser(response.name, response.token, response.id, callback);
-      },
-      function(response, callback) {
-        console.log(response);
-        return cb(null, {
-          isBase64Encoded: false,
-          statusCode: 302,
-          headers: {
-            'Location': '/',
-            'Bearer': response.token
-          },
-          body: 'Hello World'
-        })
-      }
-    ], function (error) {
       if (error) {
         // Something wrong has happened.
         return cb(null, {
