@@ -253,7 +253,7 @@ var root = {
           });
         }, function (response, callback) {
           sessionId = response[0].session;
-          token = opentok.generateToken(sessionId);
+          token = opentokClient.generateToken(sessionId);
           callback({
             statusCode: 200, body: {
               id: response[0].event_id,
