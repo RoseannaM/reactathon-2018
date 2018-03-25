@@ -42,6 +42,7 @@ function getUser(dbToken, userToken, callback) {
     }
     else {
       body = typeof body === 'string' ? JSON.parse(body) : body;
+      console.log(body);
       callback(null, body);
     }
   });
@@ -165,32 +166,6 @@ function introspect(api_key, api_secret, access_token, callback)
     }
   });
 }
- 
-function main(event, context, info)
-{
-  console.log(info);
-
-
-  // Returns a JSON.
-  context.succeed({
-    "Hello": "World",
- 
-    // The ID of the client application that is associated with the access token.
-    "clientId": info.clientId,
- 
-    // The subject (= unique identifier) of the end-user that is associated with
-    // the access token. This is not available if the access token has been created
-    // by using 'Client Credentials Flow' (RFC 6749, 4.4. Client Credentials Grant).
-    "subject": info.subject,
- 
-    // The scopes (= permissions) that are associated with the access token.
-    // This may be null.
-    "scopes": info.scopes
-  });
-}
- 
-// This method just inserts the user's first name into the greeting message.
-const getGreeting = function (firstName) { return `Hello, ${firstName}.` }
 
 const schema =  buildSchema(`
 type Query {
@@ -227,7 +202,7 @@ type User {
 // The root provides the top-level API endpoints
 var root = {
   getDie: function ({numSides}) {
-    return new RandomDie(numSides || 6);
+    return 6;
   }
 }
 
@@ -242,16 +217,23 @@ exports.handler = function(event, context, cb) {
       function (callback) {
         getUser(hasura_database_password, bearer, callback);
       }, function (response, callback) {
-        console.log(response);
-        callback(response);
+        return cb(null, {
+          isBase64Encoded: false,
+          statusCode: 200,
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: response
+        });
       }, function (response, callback) {
         params = event.queryStringParameters.query;
         params.token = bearer;
         params.user_id = response[0].id;
+        console.log(params);
         graphql(schema, params)
           .then(
             function (result) { cb(null, {statusCode: 200, body: JSON.stringify(result)})},
-            function (err) { cb(err) }
+            function (err) { cb(JSON.stringify(err)) }
           );
     }], function (error) {
       if (error) {
