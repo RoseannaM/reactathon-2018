@@ -328,7 +328,7 @@ type User {
 
 `);
 
-function getEvent (userToken, id, callback) {
+function getEvent (userToken, id, final_callback) {
   let event, session;
   async.waterfall([
     function (callback) {
@@ -340,7 +340,7 @@ function getEvent (userToken, id, callback) {
       session = response;
       getRequestsForSession(session.session, callback);
     }, function (response, callback) {
-      return {
+       final_callback(null, {
         id: event.id,
         title: event.title.html,
         session: {
@@ -361,10 +361,10 @@ function getEvent (userToken, id, callback) {
             }
           };
         })
-      };
+      });
     }
   ], function (err) {
-    callback(err);
+    final_callback(err);
   });
 }
 
