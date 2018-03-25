@@ -17,17 +17,21 @@ const styles = theme => ({
 
 const mystyles = {
   cardtitle: {
-    color: 'blue',
     margin: '5px'
+  },
+  cardOuter: {
+    display: 'block',
+    color: 'red',
+    margin: 'auto'
   }
 }
 
 export class EventCardList extends Component {
   render() {
     const classes = this.props.classes;
-    return ( <div>
+    return ( <div style={mystyles.cardOuter}>
       <div className={classes.root}>
-      <h1 style={mystyles.cardtitle}>{this.props.title}</h1>
+      <h3 style={mystyles.cardtitle}>{this.props.title}</h3>
         <List component="nav">
           
         </List>
