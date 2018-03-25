@@ -290,8 +290,8 @@ var root = {
           getEventbriteInfo(userToken, '/users/' + currentUserId + '/ownedEvents', {}, callback);
         }, function (response, callback) {
           resolve(response); // TODO
-
         }], function (error) { resolve(error) });
+    });
   },
   joinedEvents: function ({currentUserId, userToken}) {
     return getEventbriteInfoPromise(userToken, '/users/' + currentUserId + '/orders', {});
