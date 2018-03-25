@@ -3,7 +3,8 @@ const {
   GraphQLSchema,
   GraphQLObjectType,
   GraphQLString,
-  GraphQLNonNull
+  GraphQLNonNull,
+  buildSchema
 } = require('graphql')
 
 var async   = require('async');
@@ -15,7 +16,7 @@ var eventbrite_client_key= process.env.EVENTBRITE_CLIENT_KEY;
 var hasura_database_password = process.env.HASURA_DATABASE_PASSWORD;
 var url = "https://data.continental75.hasura-app.io/v1/query";
 
-function getUser(dbToken, userToken, cb) {
+function getUser(dbToken, userToken, callback) {
   request({
     url: url,
     method: 'POST',
@@ -31,7 +32,19 @@ function getUser(dbToken, userToken, cb) {
         where: { token: { '$eq': userToken }}
       }
     })
-  }, cb);
+  }, function(error, response, body) {
+    console.log(error, response, body);
+    if (error) {
+      callback(error);
+    }
+    else if (response.statusCode != 200) {
+      callback(response);
+    }
+    else {
+      body = typeof body === 'string' ? JSON.parse(body) : body;
+      callback(null, body);
+    }
+  });
 }
 
 function addUser(dbToken, user, userToken, id, callback) {
@@ -61,6 +74,7 @@ function addUser(dbToken, user, userToken, id, callback) {
       callback(response);
     }
     else {
+      body = typeof body === 'string' ? JSON.parse(body) : body;
       callback(null, body);
     }
   });
@@ -86,6 +100,7 @@ function getEventbriteUser(userToken, callback) {
       callback(response);
     }
     else {
+      body = typeof body === 'string' ? JSON.parse(body) : body;
       body.token = userToken;
       callback(null, body);
     }
@@ -111,6 +126,7 @@ function getEventbriteInfo(token, path, query) {
         reject(response);
       }
       else {
+        body = typeof body === 'string' ? JSON.parse(body) : body;
         resolve(body);
       }
     });
@@ -176,24 +192,44 @@ function main(event, context, info)
 // This method just inserts the user's first name into the greeting message.
 const getGreeting = function (firstName) { return `Hello, ${firstName}.` }
 
-// Here we declare the schema and resolvers for the query
-const schema = new GraphQLSchema({
-  query: new GraphQLObjectType({
-    name: 'ownerEvents',
-    fields: {
-      // the query has a field called 'greeting'
-      greeting: {
-        // we need to know the user's name to greet them
-        args: { firstName: { name: 'firstName', type: new GraphQLNonNull(GraphQLString) } },
-        // the greeting message is a string
-        type: GraphQLString,
-        // resolve to a greeting message
-        resolve: function (parent, args) { return getGreeting(args.firstName) }
-      }
-    }
-  }),
-})
+const schema =  buildSchema(`
+type Query {
+  ownedEvents: [Event!]!
+  joinedEvents: [Event!]!
+  event(id: ID!): Event
+}
 
+type Mutation {
+  startEvent(id: ID!): Event
+  endEvent(id: ID!): Event
+  requestToStream(id: ID!): Event
+  selectStream(sessionId: ID!, userId: ID!): Event
+}
+
+type Event {
+  id: ID!
+  title: String!
+  session: Session
+}
+
+type Session {
+  id: ID!
+  requests: [User!]
+  accessToken: String
+  stream: ID
+}
+
+type User {
+  id: ID!
+}
+`);
+
+// The root provides the top-level API endpoints
+var root = {
+  getDie: function ({numSides}) {
+    return new RandomDie(numSides || 6);
+  }
+}
 
 
 exports.handler = function(event, context, cb) {
@@ -207,10 +243,11 @@ exports.handler = function(event, context, cb) {
         getUser(hasura_database_password, bearer, callback);
       }, function (response, callback) {
         console.log(response);
-        callback();
+        callback(response);
       }, function (response, callback) {
         params = event.queryStringParameters.query;
         params.token = bearer;
+        params.user_id = response[0].id;
         graphql(schema, params)
           .then(
             function (result) { cb(null, {statusCode: 200, body: JSON.stringify(result)})},
