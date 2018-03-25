@@ -113,6 +113,8 @@ export class EventImpl extends Component {
             <BroadcastActions
               toggleCamera={this.toggleCamera}
               toggleScreen={this.toggleScreen}
+              isCameraActive={this.state.camera}
+              isScreenActive={this.state.screen}
             />
           }
         />
