@@ -2,6 +2,8 @@ import styled from "styled-components";
 import React from "react";
 import { Lockup } from "./lockup";
 
+import { Link } from "react-router-dom";
+
 const Wrapper = styled.div`
   padding: 8px 16px;
   display: flex;
@@ -12,7 +14,7 @@ const Wrapper = styled.div`
   justify-content: space-between;
   box-sizing: border-box;
   overflow: hidden;
-  margin-bottom: 20px;
+  margin-bottom: 40px;
 `;
 
 const Left = styled.div`flex-grow: 1;`;
@@ -26,7 +28,9 @@ export class Header extends React.Component {
     return (
       <Wrapper>
         <Left>
-          <Lockup />
+          <Link to="/">
+            <Lockup />
+          </Link>
         </Left>
         <Right>{this.props.actions}</Right>
       </Wrapper>
