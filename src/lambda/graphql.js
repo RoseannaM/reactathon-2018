@@ -123,13 +123,14 @@ function createSession(session, event, final_callback) {
 }
 
 function setActiveStream(eventId, streamId, callback) {
+  console.log(eventId);
   dbRequest({
     type:'update',
     args:{
       table:'events',
       "$set": {"stream": streamId },
       where: {
-        id: id
+        event_id: eventId
       }
     }
   }, callback);
