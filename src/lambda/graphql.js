@@ -58,16 +58,30 @@ function getUser(userToken, callback) {
 }
 
 function addUser(user, userToken, id, callback) {
-  dbRequest({
-    type:'insert',
-    args:{
-      table:'oauth-tokens',
-      objects:[
-        { user: user, token: userToken, id: id }
-      ],
-      returning: ['user', 'token', 'id']
-    }
-  }, callback);
+  if (typeof user === 'string') {
+    dbRequest({
+      type:'insert',
+      args:{
+        table:'oauth-tokens',
+        objects:[
+          { user: user, token: userToken, id: id }
+        ],
+        returning: ['user', 'token', 'id']
+      }
+    }, callback);
+  } else {
+    dbRequest({
+      type:'update',
+      args:{
+        table:'oauth-tokens',
+        "$set": {"token": userToken },
+        where: {
+          id: id
+        },
+        returning: ['user', 'token', 'id']
+      }
+    }, callback);
+  }
 }
 
 function createSession(session, event, callback) {
@@ -83,13 +97,35 @@ function createSession(session, event, callback) {
   }, callback);
 }
 
-function getSession(event, callback) {
+function getSessionByEvent(event, callback) {
   dbRequest({
     type:'select',
     args:{
       table:'events',
       columns: ['*'],
       where: { event_id: { '$eq': event }}
+    }
+  }, callback);
+}
+
+function getEventBySession(session, callback) {
+  dbRequest({
+    type:'select',
+    args:{
+      table:'events',
+      columns: ['*'],
+      where: { session: { '$eq': session }}
+    }
+  }, callback);
+}
+
+function getRequestsForSession(session, callback) {
+  dbRequest({
+    type:'select',
+    args:{
+      table:'requests',
+      columns: ['*'],
+      where: { session: { '$eq': session }}
     }
   }, callback);
 }
@@ -181,6 +217,33 @@ function introspect(api_key, api_secret, access_token, callback) {
   });
 }
 
+function oauthDance(api_key, api_secret, access_token, user, final_callback) {
+  var username = user && user.user || user;
+    async.waterfall([
+      function(callback) {
+        introspect(eventbrite_client_token, eventbrite_client_key, access_token, username, callback);
+      },
+      function(response, callback) {
+        getEventbriteUser(response.access_token, callback);
+      },
+      function(response, callback) {
+        addUser(user, response.token, response.id, callback);
+      },
+      function(response, callback) {
+        return final_callback(null, {
+          isBase64Encoded: false,
+          statusCode: 302,
+          headers: {
+            'Location': '/',
+            'Bearer': response.token
+          },
+          body: 'Hello World'
+        })
+      }], function (error) {
+        final_callback(error);
+      });
+}
+
 const schema =  buildSchema(`
 type Query {
   ownedEvents(currentUserId: String!, userToken: String!): [Event!]!
@@ -203,9 +266,14 @@ type Event {
 
 type Session {
   id: ID!
-  requests: [User!]
+  requests: [Request!]
   accessToken: String
   stream: ID
+}
+
+type Request {
+  session: Session!
+  user: User!
 }
 
 type User {
@@ -228,10 +296,15 @@ var root = {
   },
   startEvent: function ({id, currentUserId, userToken}) {
     return new Promise(function (resolve) {
-      opentokClient.createSession(function(err, session) {
-        if (err) resolve(err);
-        else createSession(session.sessionId, id, resolve);
-      });
+      async.waterfall([
+        function (callback) {
+          opentokClient.createSession(function(err, session) {
+            if (err) resolve(err);
+            else createSession(session.sessionId, id, callback);
+          });
+        }, function (response, callback) {
+          resolve(response); // TODO properly
+        }], function (error) { resolve(err); });
     });
   },
   endEvent: function ({id, currentUserId, userToken}) {
@@ -245,20 +318,23 @@ var root = {
         }, function (response, callback) {
           for (var order in response) {
             if (order.event_id === id) {
-              return getSession(order.event_id, callback);
+              return getSessionByEvent(order.event_id, callback);
             }
           }
           callback({
             statusCode: 404, body: 'No event found for user ' + currentUserId
           });
         }, function (response, callback) {
-          sessionId = response[0].session;
-          token = opentokClient.generateToken(sessionId);
+          var sessionId = response[0].session;
+          var token = opentokClient.generateToken(sessionId);
           callback({
             statusCode: 200, body: {
               id: response[0].event_id,
               accessToken: token
-            }
+            },
+            headers: {
+              'Access-Control-Allow-Origin': 'sad-mccarthy.netlify.com'
+            },
           });
         }], function (err) {
           resolve(err);
@@ -266,83 +342,99 @@ var root = {
     });
   },
   selectStream: function ({sessionId, userId, currentUserId, userToken}) {
-    return true;
+    return new Promise(function (resolve) {
+      let eventId;
+      async.waterfall([
+        function (callback) {
+          getEventBySession(sessionId, callback);
+        }, function (response, callback) {
+          eventId = response[0].event_id;
+          getRequestsForSession(sessionId, callback);
+        }, function (response, callback) {
+          callback({
+            statusCode: 200,
+            body: {
+              id: eventId,
+              title: 'shrug',
+              session: {
+                id: sessionId,
+                requests: response.map(req => ({
+                  session: req.session,
+                  user: {
+                    id: req.id
+                  }
+                }))
+              }
+            },
+            headers: {
+              'Access-Control-Allow-Origin': 'sad-mccarthy.netlify.com'
+            },
+          });
+        }], function (err) {
+          resolve(err)
+        });
+    });
   }
 }
 
 
 exports.handler = function(event, context, cb) {
   console.log(event);
+  console.log(context);
   var access_token = event.queryStringParameters.code;
-  var bearer = event.headers.Authorization && event.headers.Authorization.split(' ')[1];
+  var {identity, user} = context.clientContext;
+  user = user || 'nhiggins';
 
-  if (bearer) {
-    async.waterfall([
-      function (callback) {
-        getUser(bearer, callback);
-      }, function (response, callback) {
-        return cb(null, {
-          isBase64Encoded: false,
-          statusCode: 200,
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: response
-        });
-      }, function (response, callback) {
-        params = event.queryStringParameters.query;
-        params.userToken = bearer;
-        params.currentUserId = response[0].id;
-        console.log(params);
-        graphql(schema, params)
-          .then(
-            function (result) { cb(null, {statusCode: 200, body: JSON.stringify(result)})},
-            function (err) { cb(JSON.stringify(err)) }
-          );
-    }], function (error) {
-      if (error) {
-        // Something wrong has happened.
-        return cb(JSON.stringify(error));
-      }
-    });
-  } else if (!access_token) {
+  if (!user && !access_token && event.httpMethod !== 'OPTIONS') {
     return cb(null, {
-      isBase64Encoded: false,
-      statusCode: 302,
-      headers: {
-        'Location': 'https://www.eventbrite.com/oauth/authorize?response_type=code&client_id=' + eventbrite_client_token
-      },
-      body: 'Hello World'
+      statusCode: 401,
+      body: 'Missing user'
     });
   } else {
     async.waterfall([
-      function(callback) {
-        introspect(eventbrite_client_token, eventbrite_client_key, access_token, callback);
-      },
-      function(response, callback) {
-        getEventbriteUser(response.access_token, callback);
-      },
-      function(response, callback) {
-        addUser(response.name, response.token, response.id, callback);
-      },
-      function(response, callback) {
-        console.log(response);
-        return cb(null, {
-          isBase64Encoded: false,
-          statusCode: 302,
-          headers: {
-            'Location': '/',
-            'Bearer': response.token
-          },
-          body: 'Hello World'
-        })
-      }
-    ], function (error) {
+      function (callback) {
+        getUser(user, callback);
+      }, function (response, callback) {
+        if (event.httpMethod !== 'OPTIONS' && !access_token && (!response || !response[0] || !response[0].token)) {
+          return cb(null, {
+            isBase64Encoded: false,
+            statusCode: 302,
+            headers: {
+              'Location': 'https://www.eventbrite.com/oauth/authorize?response_type=code&client_id=' + eventbrite_client_token,
+            'Access-Control-Allow-Origin': 'sad-mccarthy.netlify.com'
+            },
+            body: 'Hello World'
+          });
+        } else if (event.httpMethod !== 'OPTIONS' && access_token && (!response || !response[0] || !response[0].token)) {
+          console.log(response);
+          oauthDance(eventbrite_client_token, eventbrite_client_key, access_token, response && response[0] || user, callback);
+        } else if (event.httpMethod === 'OPTIONS' || response && response[0] && response[0].token) {
+          var params = event.queryStringParameters.query;
+          params.userToken = response[0].token;
+          params.currentUserId = response[0].id;
+          console.log(params);
+          graphql(schema, params)
+            .then(
+              function (result) { cb(null, {
+                statusCode: 200, body: JSON.stringify(result),
+                headers: {
+                  'Access-Control-Allow-Origin': 'sad-mccarthy.netlify.com'
+                }})
+              },
+              function (err) { cb(JSON.stringify(err)) }
+            );
+        } else {
+          cb('Missing auth creds');
+        }
+    }], function (error) {
       if (error) {
         // Something wrong has happened.
         return cb(null, {
           isBase64Encoded: false,
           statusCode: 500,
+          headers: {
+            'Access-Control-Allow-Origin': 'sad-mccarthy.netlify.com'
+          },
           body: JSON.stringify(error)
         });
       }

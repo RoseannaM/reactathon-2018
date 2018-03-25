@@ -16,7 +16,7 @@ const mocks = {
       id: "foo",
       title: "blah",
       session: {
-        stream: "6e4c9b1f-1ab2-4616-af73-d84f4180b624",
+        stream: "5e2f3959-02ef-4a20-81e0-39de75b52968",
         id:
           "1_MX40NjA4Njk4Mn5-MTUyMTk0MTUwNTAzOX5wbnZNYUJ0NmtaNzk3Sk5mT243UTRMeVh-fg",
         accessToken:

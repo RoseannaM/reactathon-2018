@@ -7,7 +7,6 @@ import { setContext } from "apollo-link-context";
 import { onError } from "apollo-link-error";
 
 import { mockLink } from "./mocks";
-console.log(netlifyIdentity.currentUser());
 
 export const client = new ApolloClient({
   // By default, this client will send queries to the
@@ -16,17 +15,24 @@ export const client = new ApolloClient({
   // to a different host
   link: ApolloLink.from([
     setContext((request, previousContext) => ({
-      authorization: netlifyIdentity.currentUser().token.access_token
+      headers: {
+        authorization: `Bearer ${
+          netlifyIdentity.currentUser().token.access_token
+        }`
+      }
     })),
-    onError(({ networkError }) => {
-      console.log(networkError);
-      if (networkError && networkError.status === 302) {
-        console.log("redirect");
+    onError(error => {
+      if (error.networkError && error.networkError.statusCode === 401) {
+        console.log(error);
+        window.location = error.networkError.bodyText;
       }
     }),
-    createHttpLink({
-      uri: "https://sad-mccarthy.netlify.com/.netlify/functions/graphql"
-    })
+    process.env.NODE_ENV === "production"
+      ? createHttpLink({
+          uri: "https://sad-mccarthy.netlify.com/.netlify/functions/graphql",
+          credentials: "include"
+        })
+      : mockLink
   ]),
   cache: new InMemoryCache()
 });

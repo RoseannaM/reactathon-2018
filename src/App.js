@@ -4,17 +4,15 @@ import { client } from "./apollo-client";
 import { MuiThemeProvider } from "material-ui/styles";
 
 import { BrowserRouter, Route } from "react-router-dom";
+import { OAuth } from "./pages/oauth";
 import { Page1 } from "./pages/page1";
 import { Page2 } from "./pages/page2";
 import { Event } from "./pages/event";
-import { EventPage } from "./pages/event-page";
 import { Landing } from "./pages/landing";
 import { Login } from "./pages/login";
 import { OrganizerPage } from "./pages/organizer-page";
 import { theme } from "./theme.js";
 import { EventListPage } from "./pages/event-list-page";
-
-import netlifyIdentity from "netlify-identity-widget";
 import { loginUser, logoutUser } from "./identityActions";
 
 class App extends Component {
@@ -28,22 +26,7 @@ class App extends Component {
     } else {
       loginUser();
     }
-
-    console.log(netlifyIdentity.currentUser());
-
-    netlifyIdentity.on("login", user => this.setState({ user }, loginUser()));
-    netlifyIdentity.on("logout", () =>
-      this.setState({ user: null }, logoutUser())
-    );
   }
-
-  handleLogIn = () => {
-    netlifyIdentity.open();
-  };
-
-  handleLogOut = () => {
-    netlifyIdentity.logout();
-  };
 
   render() {
     return (
@@ -58,11 +41,11 @@ class App extends Component {
               <Route path="/" exact component={Landing} />
               <Route path="/page1" component={Page1} />
               <Route path="/page2" component={Page2} />
-              <Route path="/event" exact component={Event} />
-              <Route path="/event/:id" component={EventPage} />
+              <Route path="/event/:id" exact component={Event} />
               <Route path="/organizer/:id" component={OrganizerPage} />
               <Route path="/login" component={Login} />
               <Route path="/event-list" component={EventListPage} />
+              <Route path="/oauth" component={OAuth} />
             </div>
           </BrowserRouter>
         </ApolloProvider>
