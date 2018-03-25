@@ -10,9 +10,8 @@ import netlifyIdentity from "netlify-identity-widget";
 
 class EventPageView extends Component {
   renderVideo() {
-    const { session } = this.props.data.event.session;
+    const { session } = this.props.data.event;
     const currentUser = netlifyIdentity.currentUser();
-    console.log(currentUser);
 
     return session && session.accessToken ? (
       <OTSession

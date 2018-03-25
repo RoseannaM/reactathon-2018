@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import React, { Component } from "react";
 import { Timer } from "../components/timer";
+import { Title } from "../components/typography";
 
 export const PageOverlay = styled.div`
   top: 0;
@@ -13,7 +14,7 @@ export const PageOverlay = styled.div`
 `;
 
 const Left = styled.div`
-  background: black;
+  background: #140e19;
   width: 50%;
   display: flex;
   flex-direction: column;
@@ -24,7 +25,7 @@ const Left = styled.div`
 `;
 
 const Right = styled.div`
-  background: black;
+  background: #140e19;
   width: 50%;
   display: flex;
   flex-direction: column;
@@ -32,16 +33,6 @@ const Right = styled.div`
   left: ${props => (props.isRevealed ? "100%" : "50%")};
   transition: left 600ms;
   height: 100%;
-`;
-
-const Title = styled.div`
-  padding: 0;
-  margin: 0;
-  font-size: 100px;
-  color: white;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
-  font-weight: 500;
 `;
 
 export class Overlay extends Component {

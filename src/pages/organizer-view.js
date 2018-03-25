@@ -1,8 +1,11 @@
 import React, { Component } from "react";
 import styled from "styled-components";
-import { NavBar } from "../components/nav-bar";
+
+import { Header } from "../components/header";
 import { Layout, LayoutLeft, LayoutRight } from "../components/layout";
-import { StreamCard } from "../components/stream-card";
+import { Subtitle } from "../components/typography";
+
+import { StagedStreamCard, ActiveStreamCard } from "../components/stream-card";
 
 const White = styled.div`
   margin: 0;
@@ -12,27 +15,43 @@ const White = styled.div`
   color: black;
 `;
 
-const ProposedStream = styled.div`
-  padding: 20px;
+const ProposedStreamList = styled.div`
   display: flex;
   flex-direction: column;
 `;
 
-const StreamItemWrapper = styled.div``;
+const StreamCardWrapper = styled.div`padding-bottom: 10px;`;
 
 export class Organizer extends Component {
   render() {
-    const streamInfo = [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }];
+    const streamInfo = [
+      { id: 1 },
+      { id: 2 },
+      { id: 3 },
+      { id: 4 },
+      { id: 5 },
+      { id: 6 },
+      { id: 7 },
+      { id: 8 }
+    ];
 
     return (
       <White>
-        <NavBar />
+        <Header />
         <Layout>
-          <LayoutLeft>a</LayoutLeft>
+          <LayoutLeft>
+            <Subtitle>Active stream</Subtitle>
+            <ActiveStreamCard />
+          </LayoutLeft>
           <LayoutRight isOpen={true}>
-            <ProposedStream>
-              {streamInfo.map(({ id }) => <StreamCard key={id} />)}
-            </ProposedStream>
+            <Subtitle>Staged streams</Subtitle>
+            <ProposedStreamList>
+              {streamInfo.map(({ id }) => (
+                <StreamCardWrapper key={id}>
+                  <StagedStreamCard />
+                </StreamCardWrapper>
+              ))}
+            </ProposedStreamList>
           </LayoutRight>
         </Layout>
       </White>
