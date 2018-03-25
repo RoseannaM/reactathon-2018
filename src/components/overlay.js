@@ -3,6 +3,7 @@ import React, { Component } from "react";
 import { Timer } from "../components/timer";
 import { Title, Subtitle } from "../components/typography";
 import flowerFrog from "../images/flower-frog.svg";
+import Vivus from "vivus";
 
 export const PageOverlay = styled.div`
   top: 0;
@@ -47,6 +48,10 @@ const Right = styled.div`
 `;
 
 export class Overlay extends Component {
+  componentDidMount() {
+    new Vivus("flower-frog", { duration: 200 });
+  }
+
   render() {
     return (
       <PageOverlay isRevealed={this.props.isRevealed}>
@@ -57,12 +62,13 @@ export class Overlay extends Component {
           </Subtitle>
         </Left>
         <Right isRevealed={this.props.isRevealed}>
-          <img
+          <object
             width="400px"
             height="400px"
+            id="flower-frog"
+            type="image/svg+xml"
+            data={flowerFrog}
             style={{ filter: "invert(100%)" }}
-            src={flowerFrog}
-            alt="Image"
           />
         </Right>
       </PageOverlay>

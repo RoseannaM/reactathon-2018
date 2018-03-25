@@ -36,7 +36,7 @@ class EventListPageView extends Component {
     const desc = "this is a great time to be alive";
 
     if (!this.props.data.ownedEvents || !this.props.data.joinedEvents) {
-      console.log(this.props.data)
+      console.log(this.props.data);
       return null;
     }
     return (
