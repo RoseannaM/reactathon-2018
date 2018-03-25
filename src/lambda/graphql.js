@@ -567,7 +567,7 @@ var root = {
           if (response) {
             resolve(response);
           } else {
-            reject('No event found with event id ' + id);
+            reject('No event found with eventId ' + eventId);
           }
         }], function (err) {
           reject(err)
