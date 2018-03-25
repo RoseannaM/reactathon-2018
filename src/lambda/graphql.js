@@ -284,7 +284,14 @@ type User {
 // The root provides the top-level API endpoints
 var root = {
   ownedEvents: function ({currentUserId, userToken}) {
-    return getEventbriteInfoPromise(userToken, '/users/' + currentUserId + '/ownedEvents', {});
+    return new Promise(function (resolve) {
+      async.waterfall([
+        function (callback) {
+          getEventbriteInfo(userToken, '/users/' + currentUserId + '/ownedEvents', {}, callback);
+        }, function (response, callback) {
+          resolve(response); // TODO
+
+        }], function (error) { resolve(error) });
   },
   joinedEvents: function ({currentUserId, userToken}) {
     return getEventbriteInfoPromise(userToken, '/users/' + currentUserId + '/orders', {});
@@ -385,7 +392,17 @@ exports.handler = function(event, context, cb) {
   var {identity, user} = context.clientContext;
   user = user || 'nhiggins';
 
-  if (!user && !access_token && event.httpMethod !== 'OPTIONS') {
+  if (event.httpMethod === 'OPTIONS') {
+    return cb(null, {
+      statusCode: 200,
+      headers: {
+        'Access-Control-Allow-Origin': 'sad-mccarthy.netlify.com'
+      },
+      body: 'Hello World'
+    });
+  }
+
+  if (!user && !access_token) {
     return cb(null, {
       statusCode: 401,
       body: 'Missing user'
@@ -395,7 +412,7 @@ exports.handler = function(event, context, cb) {
       function (callback) {
         getUser(user, callback);
       }, function (response, callback) {
-        if (event.httpMethod !== 'OPTIONS' && !access_token && (!response || !response[0] || !response[0].token)) {
+        if (!access_token && (!response || !response[0] || !response[0].token)) {
           return cb(null, {
             isBase64Encoded: false,
             statusCode: 302,
@@ -405,10 +422,10 @@ exports.handler = function(event, context, cb) {
             },
             body: 'Hello World'
           });
-        } else if (event.httpMethod !== 'OPTIONS' && access_token && (!response || !response[0] || !response[0].token)) {
+        } else if (access_token && !(response && response[0] && response[0].token)) {
           console.log(response);
           oauthDance(eventbrite_client_token, eventbrite_client_key, access_token, response && response[0] || user, callback);
-        } else if (event.httpMethod === 'OPTIONS' || response && response[0] && response[0].token) {
+        } else if (response && response[0] && response[0].token) {
           var params = event.queryStringParameters.query;
           params.userToken = response[0].token;
           params.currentUserId = response[0].id;
