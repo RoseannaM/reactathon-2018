@@ -320,8 +320,8 @@ var root = {
             statusCode: 404, body: 'No event found for user ' + currentUserId
           });
         }, function (response, callback) {
-          sessionId = response[0].session;
-          token = opentokClient.generateToken(sessionId);
+          var sessionId = response[0].session;
+          var token = opentokClient.generateToken(sessionId);
           callback({
             statusCode: 200, body: {
               id: response[0].event_id,
