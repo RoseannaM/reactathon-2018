@@ -103,6 +103,19 @@ function createSession(session, event, callback) {
   }, callback);
 }
 
+function setActiveStream(eventId, streamId, callback) {
+  dbRequest({
+    type:'update',
+    args:{
+      table:'events',
+      "$set": {"stream": streamId },
+      where: {
+        id: id
+      }
+    }
+  }, callback);
+}
+
 function createRequest(request, callback) {
   dbRequest({
     type:'insert',
@@ -293,6 +306,7 @@ type Event {
   startingTime: String!
   description: String!
   session: Session
+  stream: ID
   requests: [Request!]
 }
 
@@ -476,26 +490,23 @@ var root = {
         function (callback) {
           getEventBySession(sessionId, callback);
         }, function (response, callback) {
-          eventId = response[0].event_id;
-          getRequestsForSession(sessionId, callback);
+          if (!response || response.length === 0) {
+            reject('No event with id ' + sessionId);
+          } else {
+            eventId = response[0].event_id;
+            getRequestsForSession(sessionId, callback);
+          }
         }, function (response, callback) {
-          resolve({
-            statusCode: 200,
-            body: {
-              id: eventId,
-              title: 'shrug',
-              session: {
-                id: sessionId,
-                requests: response.map(req => ({
-                  session: req.session,
-                  user: {
-                    id: req.id
-                  }
-                }))
-              }
-            },
-            headers: graphqlHeadears
-          });
+          for (var request in response) {
+            if (request.user === userId) {
+              return setActiveSession(eventId, request.cameraSession, callback);
+            }
+          }
+          reject('No active request found for ' + userId);
+        }, function (response, callback) {
+          getEvent(context.userToken, eventId, callback);
+        }, function (response, callback) {
+          resolve(response);
         }], function (err) {
           reject(err)
         });
