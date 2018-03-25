@@ -1,45 +1,62 @@
 import React, { Component } from "react";
 import Button from "material-ui/Button";
-
+import { Header } from "../components/header";
+import { Title, Large } from "../components/typography";
+import styled from "styled-components";
 import { Link } from "react-router-dom";
 import netlifyIdentity from "netlify-identity-widget";
+import logo from "../images/logo.png";
+
 window.netlifyIdentity = netlifyIdentity;
 // You must run this once before trying to interact with the widget
 netlifyIdentity.init();
+
+const Center = styled.div`
+  width: 100%;
+  text-align: center;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+`;
+
+const Hero = styled.div`margin: 20px 0;`;
 
 export class Landing extends Component {
   render() {
     const currentUser = netlifyIdentity.currentUser();
     return (
       <React.Fragment>
-        <Link to="/page1">
-          <Button variant="raised" color="primary">
-            Page 1
-          </Button>
-        </Link>
-        <Link to="/page2">
-          <Button variant="raised" color="primary">
-            Page 2
-          </Button>
-        </Link>
-        <Link to="/event-start">
-          <Button variant="raised" color="primary">
-            Event start
-          </Button>
-        </Link>
-        {currentUser ? (
-          <Link to="/login">
-            <Button variant="raised" color="primary">
-              Logout
-            </Button>
-          </Link>
-        ) : (
-          <Link to="/login">
-            <Button variant="raised" color="primary">
-              Login
-            </Button>
-          </Link>
-        )}
+        <Header
+          actions={
+            currentUser ? (
+              <Link to="/login">
+                <Button variant="raised" color="primary">
+                  Logout
+                </Button>
+              </Link>
+            ) : (
+              <Link to="/login">
+                <Button variant="raised" color="primary">
+                  Login
+                </Button>
+              </Link>
+            )
+          }
+        />
+        <Center>
+          <Title>
+            Get ready to <strong>Assemble.</strong>
+          </Title>
+          <Hero>
+            <img src={logo} width="300px" />
+          </Hero>
+          <div>
+            <Large>
+              <strong>Assemble</strong> is a platform for gathering with others
+              in real time for meetups and conferences.
+            </Large>
+          </div>
+        </Center>
       </React.Fragment>
     );
   }

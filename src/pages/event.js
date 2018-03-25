@@ -13,7 +13,7 @@ import { MainStreamCard } from "../components/stream-card";
 import netlifyIdentity from "netlify-identity-widget";
 import Menu, { MenuItem } from "material-ui/Menu";
 import { BroadcastActions } from "../components/broadcast-actions";
-import workspace from "../images/workspace.svg";
+import rabbit from "../images/rabbit.svg";
 import { Subtitle } from "../components/typography";
 
 const Black = styled.div`
@@ -63,7 +63,7 @@ export class EventImpl extends Component {
         {session.stream ? (
           <div>
             <ImageWrapper>
-              <img src={workspace} alt="Workspace" />
+              <img src={rabbit} alt="Rabbit" />
             </ImageWrapper>
             <ImageCaption>
               <Subtitle>Waiting for the stream to start</Subtitle>
