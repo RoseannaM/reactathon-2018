@@ -419,9 +419,9 @@ exports.handler = function(event, context, cb) {
 
           return cb(null, {
             isBase64Encoded: false,
-            statusCode: 302,
+            statusCode: 401,
             headers: headers,
-            body: 'Hello World'
+            body: headers.Location
           });
         } else if (access_token && !(response && response[0] && response[0].token)) {
           console.log(response);
