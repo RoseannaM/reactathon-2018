@@ -262,11 +262,12 @@ function getEventbriteInfo(token, path, query, callback) {
 }
 
 function filterOldEvents(events) {
-  return events.filter(function (event) {
-    var eventDate = Date.parse(event.startingTime);
-    // More than a day since it stared
-    return Date.now() - eventDate > 24 * 60 * 60 * 1000;
-  });
+  return events;
+  // return events.filter(function (event) {
+  //   var eventDate = Date.parse(event.startingTime);
+  //   // More than a day since it stared
+  //   return Date.now() - eventDate > 24 * 60 * 60 * 1000;
+  // });
 }
 
 function mapEvents (events) {
@@ -396,19 +397,23 @@ function getFullRequest (request, final_callback) {
       if (err) final_callback(err);
       else {
         console.log(results);
-        final_callback(null, {
-          cameraSession: {
-            id: request.camera,
-            accessToken: results[0][0].accessToken
-          },
-          screenSession: {
-            id: request.screen,
-            accessToken: results[1][0].accessToken
-          },
-          user: {
-            id: request.user
-          }
-        });
+        if (!results[0] || !results[0][0] || !results[1] || !results[1][0]) {
+          final_callback(null, request);
+        } else {
+          final_callback(null, {
+            cameraSession: {
+              id: request.camera,
+              accessToken: results[0][0].accessToken
+            },
+            screenSession: {
+              id: request.screen,
+              accessToken: results[1][0].accessToken
+            },
+            user: {
+              id: request.user
+            }
+          });
+        }
       }
     });
 }
