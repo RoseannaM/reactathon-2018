@@ -397,7 +397,7 @@ exports.handler = function(event, context, cb) {
           console.log(response);
           oauthDance(eventbrite_client_token, eventbrite_client_key, access_token, response && response[0] || user, callback);
         } else if (event.httpMethod === 'OPTIONS' || response && response[0] && response[0].token) {
-          params = event.queryStringParameters.query;
+          var params = event.queryStringParameters.query;
           params.userToken = response[0].token;
           params.currentUserId = response[0].id;
           console.log(params);
