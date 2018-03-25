@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import React, { Component } from "react";
 import { Timer } from "../components/timer";
-import { Title } from "../components/typography";
+import { Title, Subtitle } from "../components/typography";
 
 export const PageOverlay = styled.div`
   top: 0;
@@ -16,6 +16,7 @@ export const PageOverlay = styled.div`
 
 const Left = styled.div`
   background: black;
+  color: white;
   width: 50%;
   display: flex;
   flex-direction: column;
@@ -23,10 +24,14 @@ const Left = styled.div`
   position: fixed;
   left: ${props => (props.isRevealed ? "-50%" : "0")};
   height: 100%;
+  justify-content: center;
+  padding: 40px;
+  box-sizing: border-box;
 `;
 
 const Right = styled.div`
   background: black;
+  color: white;
   width: 50%;
   display: flex;
   flex-direction: column;
@@ -34,6 +39,9 @@ const Right = styled.div`
   left: ${props => (props.isRevealed ? "100%" : "50%")};
   transition: left 600ms;
   height: 100%;
+  padding: 40px;
+  box-sizing: border-box;
+  justify-content: center;
 `;
 
 export class Overlay extends Component {
@@ -41,10 +49,19 @@ export class Overlay extends Component {
     return (
       <PageOverlay isRevealed={this.props.isRevealed}>
         <Left isRevealed={this.props.isRevealed}>
-          <Timer />
+          <Title>Your event will start soon</Title>
+          <Subtitle>
+            The event starts in <Timer />
+          </Subtitle>
         </Left>
         <Right isRevealed={this.props.isRevealed}>
-          <Title>Chat goes here maybe</Title>
+          <img
+            width="400px"
+            height="400px"
+            style={{ border: "1px solid black" }}
+            src=""
+            alt="Image"
+          />
         </Right>
       </PageOverlay>
     );

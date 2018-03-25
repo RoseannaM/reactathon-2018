@@ -13,6 +13,8 @@ import { MainStreamCard } from "../components/stream-card";
 import netlifyIdentity from "netlify-identity-widget";
 import Menu, { MenuItem } from "material-ui/Menu";
 import { BroadcastActions } from "../components/broadcast-actions";
+import workspace from "../images/workspace.svg";
+import { Subtitle } from "../components/typography";
 
 const Black = styled.div`
   margin: 0;
@@ -26,6 +28,9 @@ const Center = styled.div`
   width: 100%;
   justify-content: center;
 `;
+
+const ImageWrapper = styled.div`margin: 20px 0;`;
+const ImageCaption = styled.div`text-align: center;`;
 
 export class EventImpl extends Component {
   state = {
@@ -51,38 +56,52 @@ export class EventImpl extends Component {
     const { session } = this.props.data.event;
     const currentUser = netlifyIdentity.currentUser();
 
+    console.log(session);
+
     return session && session.accessToken ? (
-      <OTSession
-        apiKey="46086982"
-        sessionId={session.id}
-        token={session.accessToken}
-      >
-        {session.stream === currentUser.id && this.state.camera ? (
-          <OTPublisher
-            properties={{
-              width: "800px",
-              height: "600px"
-            }}
-          />
+      <React.Fragment>
+        {session.stream ? (
+          <div>
+            <ImageWrapper>
+              <img src={workspace} alt="Workspace" />
+            </ImageWrapper>
+            <ImageCaption>
+              <Subtitle>Waiting for the stream to start</Subtitle>
+            </ImageCaption>
+          </div>
         ) : null}
-        {session.stream === currentUser.id && this.state.screen ? (
-          <OTPublisher
-            properties={{
-              width: "800px",
-              height: "600px"
-            }}
-            videoSource="screen"
-          />
-        ) : null}
-        <OTStreams>
-          <OTSubscriber
-            properties={{
-              width: "800px",
-              height: "600px"
-            }}
-          />
-        </OTStreams>
-      </OTSession>
+        <OTSession
+          apiKey="46086982"
+          sessionId={session.id}
+          token={session.accessToken}
+        >
+          {session.stream === currentUser.id && this.state.camera ? (
+            <OTPublisher
+              properties={{
+                width: "800px",
+                height: "600px"
+              }}
+            />
+          ) : null}
+          {session.stream === currentUser.id && this.state.screen ? (
+            <OTPublisher
+              properties={{
+                width: "800px",
+                height: "600px"
+              }}
+              videoSource="screen"
+            />
+          ) : null}
+          <OTStreams>
+            <OTSubscriber
+              properties={{
+                width: "800px",
+                height: "600px"
+              }}
+            />
+          </OTStreams>
+        </OTSession>
+      </React.Fragment>
     ) : null; // waiting image here
   }
 
