@@ -42,7 +42,10 @@ export default class EventCard extends Component {
               {this.props.date}
             </Typography>
             <Typography component="p">
-              {this.props.desc}
+              {this.props.desc ? 
+               this.props.desc.substring(0, 250)+" ...":
+               " "
+              }
             </Typography>
           </CardContent>
           <CardActions>
