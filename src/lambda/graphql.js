@@ -56,7 +56,7 @@ function addUser(dbToken, user, userToken, id, callback) {
       Authorization: 'Bearer ' + dbToken
     },
     body: JSON.stringify({
-      type:'upsert',
+      type:'insert',
       args:{
         table:'oauth-tokens',
         objects:[
