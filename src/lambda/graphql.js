@@ -230,6 +230,12 @@ function oauthDance(api_key, api_secret, access_token, user, final_callback) {
         introspect(eventbrite_client_token, eventbrite_client_key, access_token, username, callback);
       },
       function(response, callback) {
+        getEventbriteUser(response.access_token, callback);
+      },
+      function(response, callback) {
+        addUser(username, response.token, response.id, callback);
+      },
+      function(response, callback) {
         return final_callback(null, {
           isBase64Encoded: false,
           statusCode: 302,
@@ -294,11 +300,25 @@ var root = {
     });
   },
   joinedEvents: function ({currentUserId, userToken}) {
-    return getEventbriteInfoPromise(userToken, '/users/' + currentUserId + '/orders', {});
+    return new Promise(function (resolve) {
+      async.waterfall([
+        function (callback) {
+          getEventbriteInfoPromise(userToken, '/users/' + currentUserId + '/orders', {}, callback)
+        }, function (response, callback) {
+          resolve(response); // TODO
+        }], function (error) { resolve(error) });
+    });
   },
   event: function ({currentUserId, userToken, id}) {
-    return getEventbriteInfoPromise(userToken, '/events/search', {
-      'user.id': currentUserId
+    return new Promise(function (resolve) {
+      async.waterfall([
+        function (callback) {
+          getEventbriteInfo(userToken, '/events/search', {
+            'user.id': currentUserId
+          }, callback);
+        }, function (response, callback) {
+          resolve(response); // TODO
+        }], function (error) { resolve(error) });
     });
   },
   startEvent: function ({id, currentUserId, userToken}) {
@@ -408,26 +428,16 @@ exports.handler = function(event, context, cb) {
         getUser(user, callback);
       }, function (response, callback) {
         if (access_token && user) {
-          getEventbriteUser(access_token, function(err, data) {
-            if (err) cb(err);
-            else addUser(user, data.token, data.id, function (err, data) {
-              if (err) cb(err);
-              else cb(null, { statusCode: 200 });
-            });
-          });
+          oauthDance(eventbrite_client_token, eventbrite_client_key, access_token, user, callback);
         } else if (!access_token && (!response || !response[0] || !response[0].token)) {
           var headers = graphqlHeaders;
-          headers.Location = 'https://www.eventbrite.com/oauth/authorize?response_type=token&client_id=' + eventbrite_client_token
-
+          headers.Location = 'https://www.eventbrite.com/oauth/authorize?response_type=code&client_id=' + eventbrite_client_token
           return cb(null, {
             isBase64Encoded: false,
             statusCode: 401,
             headers: headers,
             body: headers.Location
           });
-        } else if (access_token && !(response && response[0] && response[0].token)) {
-          console.log(response);
-          oauthDance(eventbrite_client_token, eventbrite_client_key, access_token, response && response[0] || user, callback);
         } else if (response && response[0] && response[0].token) {
           var params = event.queryStringParameters.query;
           params.userToken = response[0].token;
