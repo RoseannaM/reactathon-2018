@@ -23,7 +23,9 @@ const ProposedStreamList = styled.div`
   flex-direction: column;
 `;
 
-const StreamCardWrapper = styled.div`padding-bottom: 10px;`;
+const StreamCardWrapper = styled.div`
+  padding-bottom: 10px;
+`;
 
 class SessionView extends Component {
   render() {
@@ -47,7 +49,9 @@ class SessionView extends Component {
 
 class OrganizerView extends Component {
   render() {
+    console.log(this.props.data);
     const { session } = this.props.data.event;
+    const event = this.props.data.event;
 
     return (
       <White>
@@ -63,7 +67,7 @@ class OrganizerView extends Component {
             <Subtitle>Staged streams</Subtitle>
             <ProposedStreamList>
               {session &&
-                session.requests.map(request => (
+                event.requests.map(request => (
                   <StreamCardWrapper key={request.session.id}>
                     <StagedStreamCard>
                       <SessionView session={request.session} />
