@@ -35,7 +35,6 @@ const mystyles = {
 export class EventCardList extends Component {
   render() {
     const classes = this.props.classes;
-    
     return (
       <div style={mystyles.cardOuter}>
         <div className={classes.root}>
