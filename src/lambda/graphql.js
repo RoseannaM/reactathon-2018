@@ -393,7 +393,7 @@ function getEvent (userToken, id, final_callback) {
         title: event.name.html,
         description: event.description && event.description.html,
         startingTime: event.start && event.start.utc,
-        stream: event.stream,
+        stream: session.stream,
         requests: response.map(function (req) {
           return {
             cameraSession: {
