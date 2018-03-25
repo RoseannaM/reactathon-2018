@@ -213,38 +213,38 @@ exports.handler = function(event, context, cb) {
   var bearer = event.headers.Authorization && event.headers.Authorization.split(' ')[1];
 
   if (bearer) {
-    return getUser(hasura_database_password, bearer, function (err, resp) {
+    getUser(hasura_database_password, bearer, function (err, resp) {
       console.log(err, resp);
       cb(err, {statusCode: 200, body: JSON.stringify(resp)});
     });
-    async.waterfall([
-      function (callback) {
-        getUser(hasura_database_password, bearer, callback);
-      }, function (response, callback) {
-        return cb(null, {
-          isBase64Encoded: false,
-          statusCode: 200,
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: response
-        });
-      }, function (response, callback) {
-        params = event.queryStringParameters.query;
-        params.token = bearer;
-        params.user_id = response[0].id;
-        console.log(params);
-        graphql(schema, params)
-          .then(
-            function (result) { cb(null, {statusCode: 200, body: JSON.stringify(result)})},
-            function (err) { cb(JSON.stringify(err)) }
-          );
-    }], function (error) {
-      if (error) {
-        // Something wrong has happened.
-        return cb(JSON.stringify(error));
-      }
-    });
+    // async.waterfall([
+    //   function (callback) {
+    //     getUser(hasura_database_password, bearer, callback);
+    //   }, function (response, callback) {
+    //     return cb(null, {
+    //       isBase64Encoded: false,
+    //       statusCode: 200,
+    //       headers: {
+    //         'Content-Type': 'application/json'
+    //       },
+    //       body: response
+    //     });
+    //   }, function (response, callback) {
+    //     params = event.queryStringParameters.query;
+    //     params.token = bearer;
+    //     params.user_id = response[0].id;
+    //     console.log(params);
+    //     graphql(schema, params)
+    //       .then(
+    //         function (result) { cb(null, {statusCode: 200, body: JSON.stringify(result)})},
+    //         function (err) { cb(JSON.stringify(err)) }
+    //       );
+    // }], function (error) {
+    //   if (error) {
+    //     // Something wrong has happened.
+    //     return cb(JSON.stringify(error));
+    //   }
+    // });
   } else if (!access_token) {
     return cb(null, {
       isBase64Encoded: false,
