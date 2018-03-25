@@ -17,8 +17,8 @@ const blink = keyframes`
 `;
 
 export const StagedStreamCardWrapper = styled.div`
-  width: 200px;
-  height: 150px;
+  width: 300px;
+  height: 200px;
   position: relative;
 
   box-shadow: 0 0 0 1px rgba(20, 11, 47, 0.05),
@@ -77,6 +77,7 @@ const ActiveStream = styled.div`
 const StreamActions = styled.div`
   position: absolute;
   right: 0;
+  top: 0;
   height: 50px;
   width: 50px;
   background-color: rgba(0, 0, 0, 0.5);
