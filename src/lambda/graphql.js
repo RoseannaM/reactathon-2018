@@ -431,7 +431,7 @@ exports.handler = function(event, context, cb) {
           params.userToken = response[0].token;
           params.currentUserId = response[0].id;
           console.log(params);
-          graphql(schema, params)
+          graphql(schema, params, root)
             .then(
               function (result) { cb(null, {
                 statusCode: 200, body: JSON.stringify(result),
