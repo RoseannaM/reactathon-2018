@@ -26,9 +26,7 @@ const ProposedStreamList = styled.div`
   flex-direction: column;
 `;
 
-const StreamCardWrapper = styled.div`
-  padding-bottom: 10px;
-`;
+const StreamCardWrapper = styled.div`padding-bottom: 10px;`;
 
 class SessionView extends Component {
   render() {
@@ -44,7 +42,8 @@ class SessionView extends Component {
         <OTStreams>
           <OTSubscriber
             properties={{
-              width: "100%"
+              width: "800px",
+              height: "600px"
             }}
           />
         </OTStreams>
@@ -112,8 +111,7 @@ class OrganizerView extends Component {
                       variant="raised"
                       color="primary"
                       onClick={() =>
-                        this.selectStream(`${request.user.id}-camera`)
-                      }
+                        this.selectStream(`${request.user.id}-camera`)}
                     >
                       Promote
                     </Button>
