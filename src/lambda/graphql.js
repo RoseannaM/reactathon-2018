@@ -284,7 +284,7 @@ type User {
 
 // The root provides the top-level API endpoints
 var root = {
-  ownedEvents: function ({context}) {
+  ownedEvents: function ({}, context) {
     return new Promise(function (resolve) {
       async.waterfall([
         function (callback) {
@@ -294,7 +294,7 @@ var root = {
         }], function (error) { resolve(error) });
     });
   },
-  joinedEvents: function ({context}) {
+  joinedEvents: function ({}, context) {
     return new Promise(function (resolve) {
       async.waterfall([
         function (callback) {
@@ -304,7 +304,7 @@ var root = {
         }], function (error) { resolve(error) });
     });
   },
-  event: function ({context, id}) {
+  event: function ({id}, context) {
     return new Promise(function (resolve) {
       async.waterfall([
         function (callback) {
@@ -316,7 +316,7 @@ var root = {
         }], function (error) { resolve(error) });
     });
   },
-  startEvent: function ({id, context}) {
+  startEvent: function ({id}, context) {
     return new Promise(function (resolve) {
       async.waterfall([
         function (callback) {
@@ -329,10 +329,10 @@ var root = {
         }], function (error) { resolve(err); });
     });
   },
-  endEvent: function ({id, context}) {
+  endEvent: function ({id}, context) {
     return true;
   },
-  requestToStream: function({id, context}) {
+  requestToStream: function({id}, context) {
     return new Promise(function (resolve) {
       async.waterfall([
         function (callback) {
@@ -361,7 +361,7 @@ var root = {
         });
     });
   },
-  selectStream: function ({sessionId, userId, context}) {
+  selectStream: function ({sessionId, userId}, context) {
     return new Promise(function (resolve) {
       let eventId;
       async.waterfall([
