@@ -319,6 +319,14 @@ var root = {
           getEventbriteInfo(context.userToken, '/users/' + context.currentUserId + '/orders', {}, callback)
         }, function (response, callback) {
           // TODO fix
+          var events = response.orders.map(function (order) {
+            return {
+              id: order.event_id,
+              title: 'asd',
+              description: ev.description.html,
+              start: ev.start.utc,
+            };
+          });
           resolve(mapEvents(response.orders));
         }], function (error) { reject(error) });
     });
