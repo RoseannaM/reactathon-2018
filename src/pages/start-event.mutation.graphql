@@ -1,8 +1,10 @@
 mutation startEvent($id: ID!) {
   startEvent(id: $id) {
     id
+    stream
     session {
       id
+      accessToken
     }
   }
 }

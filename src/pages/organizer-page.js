@@ -155,6 +155,7 @@ class OrganizerView extends Component {
 export const OrganizerPage = compose(
   graphql(organizerQuery, {
     options: props => ({
+      pollInterval: 5000,
       variables: {
         id: props.match.params.id
       }
