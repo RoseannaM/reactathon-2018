@@ -262,12 +262,12 @@ function getEventbriteInfo(token, path, query, callback) {
 }
 
 function filterOldEvents(events) {
-  return events;
-  // return events.filter(function (event) {
-  //   var eventDate = Date.parse(event.startingTime);
-  //   // More than a day since it stared
-  //   return Date.now() - eventDate > 24 * 60 * 60 * 1000;
-  // });
+  // return events;
+  return events.filter(function (event) {
+    var eventDate = Date.parse(event.startingTime);
+    // More than a day since it stared
+    return Date.now() - eventDate < 24 * 60 * 60 * 1000;
+  });
 }
 
 function mapEvents (events) {
