@@ -186,6 +186,17 @@ function getEventbriteInfo(token, path, query, callback) {
   });
 }
 
+function mapEvents (response) {
+  return response.events.map(function (ev) {
+    return {
+      id: ev.id,
+      title: ev.name.html,
+      description: ev.description.html,
+      start: ev.start.utc,
+    };
+  });
+}
+
 function introspect(api_key, api_secret, access_token, username, callback) {
   var body = querystring.stringify({
       code: access_token,
@@ -279,52 +290,39 @@ type User {
 // The root provides the top-level API endpoints
 var root = {
   ownedEvents: function ({}, context) {
-          return [{
-            id: '1234',
-            title: 'dummy'
-          }];
-    // return new Promise(function (resolve) {
-    //   async.waterfall([
-    //     function (callback) {
-    //       // getEventbriteInfo(context.userToken, '/users/' + context.currentUserId + '/ownedEvents', {}, callback);
-    //     // }, function (response, callback) {
-    //       resolve(null, [{
-    //         id: '1234',
-    //         title: 'dummy'
-    //       }]);
-    //     }], function (error) { resolve(error) });
-    // });
+    return new Promise(function (resolve, reject) {
+      async.waterfall([
+        function (callback) {
+          getEventbriteInfo(context.userToken, '/users/' + context.currentUserId + '/ownedEvents', {}, callback);
+        }, function (response, callback) {
+          resolve(mapEvents(response));
+        }], function (error) { reject(error) });
+    });
   },
   joinedEvents: function ({}, context) {
     return new Promise(function (resolve, reject) {
       async.waterfall([
         function (callback) {
-          // getEventbriteInfo(context.userToken, '/users/' + context.currentUserId + '/orders', {}, callback)
-        // }, function (response, callback) {
-          resolve([{
-            id: '1234',
-            title: 'dummy'
-          }]);
+          getEventbriteInfo(context.userToken, '/users/' + context.currentUserId + '/orders', {}, callback)
+        }, function (response, callback) {
+          resolve(mapEvents(response));
         }], function (error) { reject(error) });
     });
   },
   event: function ({id}, context) {
-    return new Promise(function (resolve) {
+    return new Promise(function (resolve, reject) {
       async.waterfall([
         function (callback) {
           getEventbriteInfo(context, userToken, '/events/search', {
             'user.id': context.currentUserId
           }, callback);
         }, function (response, callback) {
-          resolve(null, [{
-            id: '1234',
-            title: 'dummy'
-          }]);
-        }], function (error) { resolve(error) });
+          resolve(mapEvents(response));
+        }], function (error) { reject(error) });
     });
   },
   startEvent: function ({id}, context) {
-    return new Promise(function (resolve) {
+    return new Promise(function (resolve, reject) {
       async.waterfall([
         function (callback) {
           opentokClient.createSession(function(err, session) {
@@ -332,11 +330,8 @@ var root = {
             else createSession(session.sessionId, id, callback);
           });
         }, function (response, callback) {
-          resolve(null, {
-            id: '1234',
-            title: 'dummy'
-          });
-        }], function (error) { resolve(err); });
+          resolve(mapEvents(response)[0]);
+        }], function (error) { reject(err); });
     });
   },
   endEvent: function ({id}, context) {
@@ -346,7 +341,7 @@ var root = {
           };
   },
   requestToStream: function({id}, context) {
-    return new Promise(function (resolve) {
+    return new Promise(function (resolve, reject) {
       async.waterfall([
         function (callback) {
           getEventbriteInfo(context.userToken, '/users/' + context.currentUserId + '/orders', {}, callback);
@@ -362,20 +357,17 @@ var root = {
         }, function (response, callback) {
           var sessionId = response[0].session;
           var token = opentokClient.generateToken(sessionId);
-          callback({
-            statusCode: 200, body: {
-              id: response[0].event_id,
-              accessToken: token
-            },
-            headers: graphqlHeaders
+          resolve({
+            id: response[0].event_id,
+            accessToken: token
           });
         }], function (err) {
-          resolve(err);
+          reject(err);
         });
     });
   },
   selectStream: function ({sessionId, userId}, context) {
-    return new Promise(function (resolve) {
+    return new Promise(function (resolve, reject) {
       let eventId;
       async.waterfall([
         function (callback) {
@@ -384,7 +376,7 @@ var root = {
           eventId = response[0].event_id;
           getRequestsForSession(sessionId, callback);
         }, function (response, callback) {
-          callback({
+          resolve({
             statusCode: 200,
             body: {
               id: eventId,
@@ -402,7 +394,7 @@ var root = {
             headers: graphqlHeadears
           });
         }], function (err) {
-          resolve(err)
+          reject(err)
         });
     });
   }
