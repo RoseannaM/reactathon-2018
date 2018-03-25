@@ -8,6 +8,8 @@ import { withRouter } from "react-router-dom";
 
 const Widget = styled.div``;
 
+let mounted;
+
 export class Login extends Component {
   constructor() {
     super();
@@ -16,22 +18,28 @@ export class Login extends Component {
       netlifyIdentity.close();
       this.props.history.push("/");
     });
-
+    
     netlifyIdentity.on("close", () => {
-      if (!netlifyIdentity.currentUser()) {
+      if (!netlifyIdentity.currentUser() && mounted) {
         netlifyIdentity.open();
       }
     });
   }
 
   componentDidMount() {
+    mounted = true;
     netlifyIdentity.open();
+  }
+  
+  componentWillUnmount(){
+    console.log("unmount")
+    mounted = false;
+    netlifyIdentity.close();
   }
 
   render() {
     return (
       <Widget>
-        <Button>Log in with netlify</Button>
       </Widget>
     );
   }

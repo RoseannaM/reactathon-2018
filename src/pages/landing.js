@@ -2,9 +2,14 @@ import React, { Component } from "react";
 import Button from "material-ui/Button";
 
 import { Link } from "react-router-dom";
+import netlifyIdentity from "netlify-identity-widget";
 
 export class Landing extends Component {
+
   render() {
+
+    const currentUser = netlifyIdentity.currentUser();
+    console.log(currentUser);
     return (
       <React.Fragment>
         <Link to="/page1">
@@ -20,13 +25,21 @@ export class Landing extends Component {
         <Link to="/event-start">
           <Button variant="raised" color="primary">
             Event start
-          </Button>
+          </Button>s
         </Link>
-        <Link to="/login">
-          <Button variant="raised" color="primary">
-            Login
+        {currentUser ?
+          <Link to="/login">
+            <Button variant="raised" color="primary">
+              Logout
           </Button>
-        </Link>
+          </Link> :
+          <Link to="/login">
+            <Button variant="raised" color="primary">
+              Login
+        </Button>
+          </Link>
+        }
+        
       </React.Fragment>
     );
   }
