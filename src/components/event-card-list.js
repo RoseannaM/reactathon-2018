@@ -5,8 +5,8 @@ import Divider from "material-ui/Divider";
 import InboxIcon from "material-ui-icons/Inbox";
 import DraftsIcon from "material-ui-icons/Drafts";
 import PropTypes from "prop-types";
-import Button from 'material-ui/Button';
-import Typography from 'material-ui/Typography';
+import Button from "material-ui/Button";
+import Typography from "material-ui/Typography";
 
 const styles = theme => ({
   root: {
@@ -20,11 +20,11 @@ const mystyles = {
   cardtitle: {
     margin: "5px",
     color: "#fff",
-    fontWeight: '300'
+    fontWeight: "300"
   },
   cardOuter: {
     display: "block",
-    margin: "10px 0",
+    margin: "10px 0 30px 0",
     padding: "10px",
     borderRadius: "5px",
     backgroundImage:
