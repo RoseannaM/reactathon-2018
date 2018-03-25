@@ -367,7 +367,7 @@ exports.handler = function(event, context, cb) {
   } else {
     async.waterfall([
       function (callback) {
-        getUser(bearer, callback);
+        getUser(user, callback);
       }, function (response, callback) {
         if (!access_token && (!response || !response[0] || !response[0].token)) {
           return cb(null, {
