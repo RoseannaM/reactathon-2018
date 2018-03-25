@@ -296,10 +296,15 @@ var root = {
   },
   startEvent: function ({id, currentUserId, userToken}) {
     return new Promise(function (resolve) {
-      opentokClient.createSession(function(err, session) {
-        if (err) resolve(err);
-        else createSession(session.sessionId, id, resolve);
-      });
+      async.waterfall([
+        function (callback) {
+          opentokClient.createSession(function(err, session) {
+            if (err) resolve(err);
+            else createSession(session.sessionId, id, callback);
+          });
+        }, function (response, callback) {
+          resolve(response); // TODO properly
+        }], function (error) { resolve(err); });
     });
   },
   endEvent: function ({id, currentUserId, userToken}) {
@@ -326,7 +331,10 @@ var root = {
             statusCode: 200, body: {
               id: response[0].event_id,
               accessToken: token
-            }
+            },
+            headers: {
+              'Access-Control-Allow-Origin': 'sad-mccarthy.netlify.com'
+            },
           });
         }], function (err) {
           resolve(err);
@@ -357,7 +365,10 @@ var root = {
                   }
                 }))
               }
-            }
+            },
+            headers: {
+              'Access-Control-Allow-Origin': 'sad-mccarthy.netlify.com'
+            },
           });
         }], function (err) {
           resolve(err)
@@ -374,7 +385,7 @@ exports.handler = function(event, context, cb) {
   var {identity, user} = context.clientContext;
   user = user || 'nhiggins';
 
-  if (!user && !access_token || event.httpMethod !== 'OPTIONS') {
+  if (!user && !access_token && event.httpMethod !== 'OPTIONS') {
     return cb(null, {
       statusCode: 401,
       body: 'Missing user'
