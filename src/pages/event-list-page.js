@@ -75,11 +75,10 @@ class EventListPageView extends Component {
                   key={event.id}
                   title={event.title}
                   href={"/event/" + event.id}
-                  date={event.date || date}
-                  desc={event.desc || desc}
+                  date={event.date}
+                  desc={event.desc}
                 />
               ))}
-
               <EventCard
                 title="Join event"
                 isExternal={true}

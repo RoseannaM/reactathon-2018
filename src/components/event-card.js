@@ -46,13 +46,13 @@ export default class EventCard extends Component {
             </Typography>
           </CardContent>
           <CardActions>
-            {this.props.isExternal ?
-              <a href={"/event/" + this.props.id}
-              ><Button size="small">Join Event</Button>
-              </a> :
+            {!this.props.isExternal ?
               <Link to={this.props.href}>
-                <Button size="small">Join Event</Button>
-              </Link>
+              <Button size="small">Join Event</Button>
+              </Link>:
+              <a href={this.props.href}>
+              <Button size="small">Join Event</Button>
+              </a>
             }
           </CardActions>
         </Card>
