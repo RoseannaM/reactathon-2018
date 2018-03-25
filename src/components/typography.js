@@ -17,6 +17,15 @@ export const Subtitle = styled.h2`
   margin-bottom: 10px;
 `;
 
+export const SmallSubtitle = styled.h2`
+  font-size: 1.25em;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  font-weight: 400;
+  margin: 0;
+  margin-bottom: 10px;
+`;
+
 export const Large = styled.p`
   font-size: 1.5em;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,

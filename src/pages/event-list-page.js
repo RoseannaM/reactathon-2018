@@ -14,7 +14,7 @@ import {
   LayoutRight,
   LayoutMiddle
 } from "../components/layout";
-import { Subtitle, Large } from "../components/typography";
+import { Subtitle, SmallSubtitle, Large } from "../components/typography";
 import withLoadingSpinner from "../components/with-loading-spinner";
 
 const White = styled.div`

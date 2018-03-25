@@ -87,7 +87,6 @@ export class EventImpl extends Component {
       <React.Fragment>
         <Metadata>
           <Subtitle>{event.title}</Subtitle>
-          <Large>{event.description}</Large>
         </Metadata>
         {!event.stream ? (
           <div>

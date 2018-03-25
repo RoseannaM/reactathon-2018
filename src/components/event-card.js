@@ -5,10 +5,10 @@ import List, { ListItem, ListItemIcon, ListItemText } from "material-ui/List";
 import Divider from "material-ui/Divider";
 import DraftsIcon from "material-ui-icons/Drafts";
 import PropTypes from "prop-types";
-import Card, { CardActions, CardContent } from 'material-ui/Card';
-import Button from 'material-ui/Button';
+import Card, { CardActions, CardContent } from "material-ui/Card";
+import Button from "material-ui/Button";
 import { Link } from "react-router-dom";
-import Typography from 'material-ui/Typography';
+import Typography from "material-ui/Typography";
 
 const mystyles = {
   listItem: {
@@ -23,14 +23,10 @@ const cardStyle = {
   card: {
     marginBottom: "10px"
   }
-}
-
-
+};
 
 export default class EventCard extends Component {
-
   render() {
-
     return (
       <div style={cardStyle.card}>
         <Card>
@@ -38,22 +34,19 @@ export default class EventCard extends Component {
             <Typography variant="headline" component="h2">
               {this.props.title}
             </Typography>
-            <Typography color="textSecondary">
-              {this.props.date}
-            </Typography>
-            <Typography component="p">
-              {this.props.desc}
-            </Typography>
+            <Typography color="textSecondary">{this.props.date}</Typography>
+            <Typography component="p">{this.props.desc}</Typography>
           </CardContent>
           <CardActions>
-            {!this.props.isExternal ?
+            {!this.props.isExternal ? (
               <Link to={this.props.href}>
-              <Button size="small">Join Event</Button>
-              </Link>:
+                <Button size="small">Join Event</Button>
+              </Link>
+            ) : (
               <a href={this.props.href}>
-              <Button size="small">Join Event</Button>
+                <Button size="small">Join Event</Button>
               </a>
-            }
+            )}
           </CardActions>
         </Card>
       </div>

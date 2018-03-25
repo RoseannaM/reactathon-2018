@@ -25,9 +25,8 @@ export const StagedStreamCard = styled.div`
 `;
 
 const ActiveStreamWrapper = styled.div`
-  width: 100%;
-  border: 1px solid black;
-  padding-bottom: 75%;
+  width: 800px;
+  height: 600px;
   position: relative;
 
   box-shadow: 0 0 0 1px rgba(20, 11, 47, 0.05),
