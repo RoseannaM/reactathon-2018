@@ -58,16 +58,30 @@ function getUser(userToken, callback) {
 }
 
 function addUser(user, userToken, id, callback) {
-  dbRequest({
-    type:'insert',
-    args:{
-      table:'oauth-tokens',
-      objects:[
-        { user: user, token: userToken, id: id }
-      ],
-      returning: ['user', 'token', 'id']
-    }
-  }, callback);
+  if (typeof user === 'string') {
+    dbRequest({
+      type:'insert',
+      args:{
+        table:'oauth-tokens',
+        objects:[
+          { user: user, token: userToken, id: id }
+        ],
+        returning: ['user', 'token', 'id']
+      }
+    }, callback);
+  } else {
+    dbRequest({
+      type:'update',
+      args:{
+        table:'oauth-tokens',
+        "$set": {"token": userToken },
+        where: {
+          id: id
+        },
+        returning: ['user', 'token', 'id']
+      }
+    }, callback);
+  }
 }
 
 function createSession(session, event, callback) {
@@ -203,16 +217,17 @@ function introspect(api_key, api_secret, access_token, callback) {
   });
 }
 
-function oauthDance(api_key, api_secret, access_token, final_callback) {
+function oauthDance(api_key, api_secret, access_token, user, final_callback) {
+  username = user.user || user;
     async.waterfall([
       function(callback) {
-        introspect(eventbrite_client_token, eventbrite_client_key, access_token, callback);
+        introspect(eventbrite_client_token, eventbrite_client_key, access_token, username, callback);
       },
       function(response, callback) {
         getEventbriteUser(response.access_token, callback);
       },
       function(response, callback) {
-        addUser(response.name, response.token, response.id, callback);
+        addUser(user, response.token, response.id, callback);
       },
       function(response, callback) {
         return final_callback(null, {
@@ -379,7 +394,7 @@ exports.handler = function(event, context, cb) {
             body: 'Hello World'
           });
         } else if (access_token && (!response || !response[0] || !response[0].token)) {
-          oauthDance(eventbrite_client_token, eventbrite_client_key, access_token, callback);
+          oauthDance(eventbrite_client_token, eventbrite_client_key, access_token, response && response[0] || user, callback);
         } else if (response && response[0] && response[0].token) {
           params = event.queryStringParameters.query;
           params.userToken = response[0].token;
