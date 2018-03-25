@@ -1,6 +1,10 @@
 import styled, { keyframes } from "styled-components";
 import React from "react";
 
+import IconButton from "material-ui/IconButton";
+import StopIcon from "material-ui-icons/Stop";
+import Tooltip from "material-ui/Tooltip";
+
 const blink = keyframes`
   0% {
     color: transparent;
@@ -52,7 +56,7 @@ const ActiveStream = styled.div`
 const ActiveStreamActions = styled.div`
   position: absolute;
   right: 0;
-  height: 100%;
+  height: 50px;
   width: 50px;
   background-color: rgba(0, 0, 0, 0.5);
   color: white;
@@ -66,7 +70,13 @@ const ActiveStreamActions = styled.div`
 export const ActiveStreamCard = props => (
   <ActiveStreamWrapper>
     <ActiveStream>{props.children}</ActiveStream>
-    <ActiveStreamActions>X</ActiveStreamActions>
+    <ActiveStreamActions>
+      <Tooltip id="tooltip-top-start" title="Stop stream" placement="right">
+        <IconButton aria-label="Stop" style={{ color: "white" }}>
+          <StopIcon />
+        </IconButton>
+      </Tooltip>
+    </ActiveStreamActions>
   </ActiveStreamWrapper>
 );
 

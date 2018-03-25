@@ -342,13 +342,9 @@ function getEvent (userToken, id, final_callback) {
       getRequestsForEvent(id, callback);
     }, function (response, callback) {
       console.log(response);
-       final_callback(null, {
+      var result = {
         id: event.id,
         title: event.name.html,
-        session: {
-          id: session.session,
-          accessToken: session.accessToken
-        },
         stream: event.stream,
         requests: response.map(function (req) {
           return {
@@ -363,7 +359,14 @@ function getEvent (userToken, id, final_callback) {
             }
           };
         })
-      });
+      };
+      if (session) {
+        result.session = {
+          id: session.session,
+          accessToken: session.accessToken
+        };
+      }
+      final_callback(null, result)
     }
   ], function (err) {
     final_callback(err);
