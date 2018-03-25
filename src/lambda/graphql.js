@@ -96,9 +96,9 @@ function createSession(session, event, callback) {
     args:{
       table:'events',
       objects:[
-        { event_id: event, session: session, title: 'Something' }
+        { event_id: event, session: session }
       ],
-      returning: ['event_id', 'session', 'id']
+      returning: ['event_id', 'session', 'stream']
     }
   }, callback);
 }
@@ -151,13 +151,13 @@ function getEventBySession(session, callback) {
   }, callback);
 }
 
-function getRequestsForSession(session, callback) {
+function getRequestsForEvent(event, callback) {
   dbRequest({
     type:'select',
     args:{
-      table:'requests',
+      table:'request',
       columns: ['*'],
-      where: { session: { '$eq': session }}
+      where: { event: { '$eq': event }}
     }
   }, callback);
 }
@@ -215,12 +215,13 @@ function getEventbriteInfo(token, path, query, callback) {
 
 function mapEvents (events) {
   if (Array.isArray(events)) {
-    return response.events.map(function (ev) {
+    return events.map(function (ev) {
+      console.log(ev);
       return {
         id: ev.id,
-        title: ev.name.html,
-        description: ev.description.html,
-        startingTime: ev.start.utc,
+        title: ev.name && ev.name.html,
+        description: ev.description && ev.description.html,
+        startingTime: ev.start && ev.start.utc,
       };
     });
   } else {
@@ -331,21 +332,19 @@ function getEvent (userToken, id, final_callback) {
   let event, session;
   async.waterfall([
     function (callback) {
-      getEventbriteInfo(context, userToken, '/events/' + id, {}, callback);
+      getEventbriteInfo(userToken, '/events/' + id, {}, callback);
     }, function (response, callback) {
       event = response;
       getSessionByEvent(id, callback);
     }, function (response, callback) {
-      session = response;
-      getRequestsForSession(session.session, callback);
+      console.log('RESPONSE' + JSON.stringify(response));
+      session = response[0];
+      getRequestsForEvent(id, callback);
     }, function (response, callback) {
-       final_callback(null, {
+      console.log(response);
+      var result = {
         id: event.id,
-        title: event.title.html,
-        session: {
-          id: session.session,
-          accessToken: session.accessToken
-        },
+        title: event.name.html,
         stream: event.stream,
         requests: response.map(function (req) {
           return {
@@ -360,7 +359,14 @@ function getEvent (userToken, id, final_callback) {
             }
           };
         })
-      });
+      };
+      if (session) {
+        result.session = {
+          id: session.session,
+          accessToken: session.accessToken
+        };
+      }
+      final_callback(null, result)
     }
   ], function (err) {
     final_callback(err);
@@ -392,8 +398,8 @@ var root = {
             return {
               id: order.event_id,
               title: 'asd',
-              description: ev.description.html,
-              start: ev.start.utc,
+              description: 'another description',
+              start: 'soon-ish'
             };
           });
           resolve(mapEvents(response.orders));
@@ -422,7 +428,7 @@ var root = {
           getEvent(context.userToken, id, callback);
         }, function (response, callback) {
           resolve(response);
-        }], function (error) { reject(err); });
+        }], function (error) { reject(error); });
     });
   },
   endEvent: function ({id}, context) {
@@ -447,7 +453,7 @@ var root = {
           }
           request = {
             event: id,
-            user: currentUserId
+            user: context.currentUserId
           };
 
           opentokClient.createSession(function (err, session) {
@@ -514,7 +520,7 @@ var root = {
 }
 
 function getNetlifyUser({url}, bearer, callback) {
-  if (bearer === 'nhiggins-test') {
+  if (bearer.toLowerCase() === 'bearer nhiggins-test') {
     callback(null, { id: '6e4c9b1f-1ab2-4616-af73-d84f4180b624' })
   } else {
     request({
@@ -553,6 +559,7 @@ exports.handler = function(event, context, cb) {
 
   var access_token = event.queryStringParameters.code;
   var {identity} = context.clientContext || {};
+  identity = identity || {}; // TODO TESTING
   var bearer = event.headers.authorization;
 
   getNetlifyUser(identity, bearer, function (err, response) {

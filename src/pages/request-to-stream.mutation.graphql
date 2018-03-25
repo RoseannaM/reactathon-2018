@@ -2,9 +2,11 @@ mutation requestToStream($id: ID!) {
   requestToStream(id: $id) {
     cameraSession {
       id
+      accessToken
     }
     screenSession {
       id
+      accessToken
     }
   }
 }

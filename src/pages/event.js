@@ -5,6 +5,7 @@ import { Overlay } from "../components/overlay";
 import { Header } from "../components/header";
 import { compose, graphql } from "react-apollo";
 import eventQuery from "./event.query.graphql";
+import requestMutation from "./request-to-stream.mutation.graphql";
 import EventCardList from "../components/event-card-list";
 import EventCard from "../components/event-card";
 import withLoadingSpinner from "../components/with-loading-spinner";
@@ -41,28 +42,52 @@ export class EventImpl extends Component {
     camera: false,
     screen: false,
     isOpen: false,
-    isRevealed: false
+    isRevealed: false,
+    request: null
   };
 
   toggleCamera = () => {
+    if (!this.state.camera) {
+      this.requestToStream();
+    }
     this.setState({
       camera: !this.state.camera
     });
   };
 
   toggleScreen = () => {
+    if (!this.state.screen) {
+      this.requestToStream();
+    }
     this.setState({
       screen: !this.state.screen
     });
   };
 
+  requestToStream = () => {
+    if (!this.state.request) {
+      this.props
+        .mutate({
+          variables: {
+            id: this.props.data.event.id
+          }
+        })
+        .then(result => {
+          console.log(result);
+          this.setState({
+            request: result.data.requestToStream
+          });
+        });
+    }
+  };
+
   renderVideo() {
-    const { session } = this.props.data.event;
+    const event = this.props.data.event;
     const currentUser = netlifyIdentity.currentUser();
 
-    return session && session.accessToken ? (
+    return event.session && event.session.accessToken ? (
       <React.Fragment>
-        {session.stream ? (
+        {!event.stream ? (
           <div>
             <ImageWrapper>
               <img src={rabbit} alt="Rabbit" />
@@ -74,10 +99,10 @@ export class EventImpl extends Component {
         ) : null}
         <OTSession
           apiKey="46086982"
-          sessionId={session.id}
-          token={session.accessToken}
+          sessionId={event.session.id}
+          token={event.session.accessToken}
         >
-          {session.stream === currentUser.id && this.state.camera ? (
+          {event.stream === `${currentUser.id}-camera` && this.state.camera ? (
             <OTPublisher
               properties={{
                 width: "800px",
@@ -85,7 +110,7 @@ export class EventImpl extends Component {
               }}
             />
           ) : null}
-          {session.stream === currentUser.id && this.state.screen ? (
+          {event.stream === `${currentUser.id}-screen` && this.state.screen ? (
             <OTPublisher
               properties={{
                 width: "800px",
@@ -145,6 +170,35 @@ export class EventImpl extends Component {
           </LayoutMiddle>
         </Layout>
         <Overlay isRevealed={this.state.isRevealed} />
+        {this.state.request ? (
+          <div style={{ display: "none" }}>
+            {this.state.camera ? (
+              <OTSession
+                style={{ display: "none" }}
+                apiKey="46086982"
+                sessionId={this.state.request.cameraSession.id}
+                token={this.state.request.cameraSession.accessToken}
+              >
+                <OTPublisher style={{ display: "none" }} />
+              </OTSession>
+            ) : null}
+            {this.state.screen ? (
+              <OTSession
+                style={{ display: "none" }}
+                apiKey="46086982"
+                sessionId={this.state.request.screenSession.id}
+                token={this.state.request.screenSession.accessToken}
+              >
+                <OTPublisher
+                  style={{ display: "none" }}
+                  properties={{
+                    videoSource: "screen"
+                  }}
+                />
+              </OTSession>
+            ) : null}
+          </div>
+        ) : null}
       </Black>
     );
   }
@@ -158,5 +212,6 @@ export const Event = compose(
       }
     })
   }),
+  graphql(requestMutation),
   withLoadingSpinner
 )(EventImpl);
