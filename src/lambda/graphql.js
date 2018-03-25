@@ -400,6 +400,27 @@ var root = {
   }
 }
 
+function getNetlifyUser({url, token}, callback) {
+  request({
+    url: url + '/user',
+    headers: {
+      Authorization: 'Bearer ' + token
+    }
+  }, function(error, response, body) {
+    console.log(error, response, body);
+    if (error) {
+      callback(error);
+    }
+    else if (response.statusCode != 200) {
+      callback(response);
+    }
+    else {
+      body = typeof body === 'string' ? JSON.parse(body) : body;
+      console.log(body);
+      callback(null, body);
+    }
+  });
+}
 
 exports.handler = function(event, context, cb) {
   console.log(event);
@@ -414,59 +435,67 @@ exports.handler = function(event, context, cb) {
   }
 
   var access_token = event.queryStringParameters.code;
-  var {identity, user} = context.clientContext;
-  user = user || 'nhiggins';
+  var {identity} = context.clientContext;
 
-  if (!user && !access_token) {
-    return cb(null, {
-      statusCode: 401,
-      body: 'Missing user'
-    });
-  } else {
-    async.waterfall([
-      function (callback) {
-        getUser(user, callback);
-      }, function (response, callback) {
-        if (access_token && user) {
-          oauthDance(eventbrite_client_token, eventbrite_client_key, access_token, user, callback);
-        } else if (!access_token && (!response || !response[0] || !response[0].token)) {
-          var headers = graphqlHeaders;
-          headers.Location = 'https://www.eventbrite.com/oauth/authorize?response_type=code&client_id=' + eventbrite_client_token
+  getNetlifyUser(identity, function (err, response) {
+    if (err) {
+      return cb(err);
+    }
+
+    console.log(response);
+    var user = response;
+
+    if (!user && !access_token) {
+      return cb(null, {
+        statusCode: 401,
+        body: 'Missing user'
+      });
+    } else {
+      async.waterfall([
+        function (callback) {
+          getUser(user, callback);
+        }, function (response, callback) {
+          if (access_token && user) {
+            oauthDance(eventbrite_client_token, eventbrite_client_key, access_token, user, callback);
+          } else if (!access_token && (!response || !response[0] || !response[0].token)) {
+            var headers = graphqlHeaders;
+            headers.Location = 'https://www.eventbrite.com/oauth/authorize?response_type=code&client_id=' + eventbrite_client_token
+            return cb(null, {
+              isBase64Encoded: false,
+              statusCode: 401,
+              headers: headers,
+              body: headers.Location
+            });
+          } else if (response && response[0] && response[0].token) {
+            var params = event.queryStringParameters.query;
+            params.userToken = response[0].token;
+            params.currentUserId = response[0].id;
+            console.log(params);
+            graphql(schema, params, root)
+              .then(
+                function (result) { cb(null, {
+                  statusCode: 200, body: JSON.stringify(result),
+                  headers: graphqlHeaders
+                })
+                },
+                function (err) { cb(JSON.stringify(err)) }
+              );
+          } else {
+            cb('Missing auth creds');
+          }
+      }], function (error) {
+        if (error) {
+          // Something wrong has happened.
           return cb(null, {
             isBase64Encoded: false,
-            statusCode: 401,
-            headers: headers,
-            body: headers.Location
+            statusCode: 500,
+            headers: graphqlHeaders,
+            body: JSON.stringify(error)
           });
-        } else if (response && response[0] && response[0].token) {
-          var params = event.queryStringParameters.query;
-          params.userToken = response[0].token;
-          params.currentUserId = response[0].id;
-          console.log(params);
-          graphql(schema, params, root)
-            .then(
-              function (result) { cb(null, {
-                statusCode: 200, body: JSON.stringify(result),
-                headers: graphqlHeaders
-              })
-              },
-              function (err) { cb(JSON.stringify(err)) }
-            );
-        } else {
-          cb('Missing auth creds');
         }
-    }], function (error) {
-      if (error) {
-        // Something wrong has happened.
-        return cb(null, {
-          isBase64Encoded: false,
-          statusCode: 500,
-          headers: graphqlHeaders,
-          body: JSON.stringify(error)
-        });
-      }
-    });
-  }
+      });
+    };
+  });
 };
 
 
