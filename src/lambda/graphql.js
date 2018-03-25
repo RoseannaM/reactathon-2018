@@ -24,7 +24,7 @@ var openTokClient = new OpenTok(opentokApiKey, opentokApiSecret);
 var graphqlHeaders = {
   'Access-Control-Allow-Origin': 'sad-mccarthy.netlify.com,localhost,http://localhost:3000',
   'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-  'Access-Control-Allow-Credentials': true
+  'Access-Control-Allow-Credentials': 'true'
 };
 
 function dbRequest(reqBody, callback) {
@@ -390,9 +390,6 @@ var root = {
 exports.handler = function(event, context, cb) {
   console.log(event);
   console.log(context);
-  var access_token = event.queryStringParameters.code;
-  var {identity, user} = context.clientContext;
-  user = user || 'nhiggins';
 
   if (event.httpMethod === 'OPTIONS') {
     return cb(null, {
@@ -401,6 +398,10 @@ exports.handler = function(event, context, cb) {
       body: 'Hello World'
     });
   }
+
+  var access_token = event.queryStringParameters.code;
+  var {identity, user} = context.clientContext;
+  user = user || 'nhiggins';
 
   if (!user && !access_token) {
     return cb(null, {
