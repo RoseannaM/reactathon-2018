@@ -18,7 +18,7 @@ export class Login extends Component {
       netlifyIdentity.close();
       this.props.history.push("/");
     });
-    
+
     netlifyIdentity.on("close", () => {
       if (!netlifyIdentity.currentUser() && mounted) {
         netlifyIdentity.open();
@@ -30,18 +30,15 @@ export class Login extends Component {
     mounted = true;
     netlifyIdentity.open();
   }
-  
-  componentWillUnmount(){
-    console.log("unmount")
+
+  componentWillUnmount() {
+    console.log("unmount");
     mounted = false;
     netlifyIdentity.close();
   }
 
   render() {
-    return (
-      <Widget>
-      </Widget>
-    );
+    return <Widget />;
   }
 }
 

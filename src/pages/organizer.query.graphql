@@ -2,19 +2,19 @@ query event($id: ID!) {
   event(id: $id) {
     id
     title
+    stream
+    requests {
+      session {
+        id
+        accessToken
+      }
+      user {
+        id
+      }
+    }
     session {
       id
-      stream
       accessToken
-      requests {
-        session {
-          id
-          accessToken
-        }
-        user {
-          id
-        }
-      }
     }
   }
 }

@@ -64,8 +64,8 @@ export class BroadcastActions extends React.Component {
             }}
           >
             <IconWrapper>
-              <PresentToAllIcon />
-            </IconWrapper>Broadcast screen
+              <VideocamIcon />
+            </IconWrapper>Broadcast camera
           </MenuItem>
           <MenuItem
             onClick={() => {
@@ -77,8 +77,8 @@ export class BroadcastActions extends React.Component {
             }}
           >
             <IconWrapper>
-              <VideocamIcon />
-            </IconWrapper>Broadcast camera
+              <PresentToAllIcon />
+            </IconWrapper>Broadcast screen
           </MenuItem>
         </Menu>
         <RequestDialog

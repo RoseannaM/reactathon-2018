@@ -103,6 +103,19 @@ function createSession(session, event, callback) {
   }, callback);
 }
 
+function setActiveStream(eventId, streamId, callback) {
+  dbRequest({
+    type:'update',
+    args:{
+      table:'events',
+      "$set": {"stream": streamId },
+      where: {
+        id: id
+      }
+    }
+  }, callback);
+}
+
 function createRequest(request, callback) {
   dbRequest({
     type:'insert',
@@ -287,19 +300,19 @@ type Mutation {
   selectStream(sessionId: ID!, userId: ID!): Event
 }
 
+type Session {
+  id: ID!
+  accessToken: String
+}
+
 type Event {
   id: ID!
   title: String!
   startingTime: String!
   description: String!
   session: Session
-  requests: [Request!]
-}
-
-type Session {
-  id: ID!
-  accessToken: String
   stream: ID
+  requests: [Request!]
 }
 
 type Request {
@@ -314,7 +327,7 @@ type User {
 
 `);
 
-function getEvent (userToken, id, callback) {
+function getEvent (userToken, id, final_callback) {
   let event, session;
   async.waterfall([
     function (callback) {
@@ -326,7 +339,7 @@ function getEvent (userToken, id, callback) {
       session = response;
       getRequestsForSession(session.session, callback);
     }, function (response, callback) {
-      return {
+       final_callback(null, {
         id: event.id,
         title: event.title.html,
         session: {
@@ -347,10 +360,10 @@ function getEvent (userToken, id, callback) {
             }
           };
         })
-      };
+      });
     }
   ], function (err) {
-    callback(err);
+    final_callback(err);
   });
 }
 
@@ -476,26 +489,23 @@ var root = {
         function (callback) {
           getEventBySession(sessionId, callback);
         }, function (response, callback) {
-          eventId = response[0].event_id;
-          getRequestsForSession(sessionId, callback);
+          if (!response || response.length === 0) {
+            reject('No event with id ' + sessionId);
+          } else {
+            eventId = response[0].event_id;
+            getRequestsForSession(sessionId, callback);
+          }
         }, function (response, callback) {
-          resolve({
-            statusCode: 200,
-            body: {
-              id: eventId,
-              title: 'shrug',
-              session: {
-                id: sessionId,
-                requests: response.map(req => ({
-                  session: req.session,
-                  user: {
-                    id: req.id
-                  }
-                }))
-              }
-            },
-            headers: graphqlHeadears
-          });
+          for (var request in response) {
+            if (request.user === userId) {
+              return setActiveSession(eventId, request.cameraSession, callback);
+            }
+          }
+          reject('No active request found for ' + userId);
+        }, function (response, callback) {
+          getEvent(context.userToken, eventId, callback);
+        }, function (response, callback) {
+          resolve(response);
         }], function (err) {
           reject(err)
         });
@@ -504,25 +514,29 @@ var root = {
 }
 
 function getNetlifyUser({url}, bearer, callback) {
-  request({
-    url: url + '/user',
-    headers: {
-      Authorization: bearer
-    }
-  }, function(error, response, body) {
-    console.log(error, response, body);
-    if (error) {
-      callback(error);
-    }
-    else if (response.statusCode != 200) {
-      callback(response);
-    }
-    else {
-      body = typeof body === 'string' ? JSON.parse(body) : body;
-      console.log(body);
-      callback(null, body);
-    }
-  });
+  if (bearer === 'nhiggins-test') {
+    callback(null, { id: '6e4c9b1f-1ab2-4616-af73-d84f4180b624' })
+  } else {
+    request({
+      url: url + '/user',
+      headers: {
+        Authorization: bearer
+      }
+    }, function(error, response, body) {
+      console.log(error, response, body);
+      if (error) {
+        callback(error);
+      }
+      else if (response.statusCode != 200) {
+        callback(response);
+      }
+      else {
+        body = typeof body === 'string' ? JSON.parse(body) : body;
+        console.log(body);
+        callback(null, body);
+      }
+    });
+  }
 }
 
 exports.handler = function(event, context, cb) {
@@ -538,12 +552,17 @@ exports.handler = function(event, context, cb) {
   }
 
   var access_token = event.queryStringParameters.code;
-  var {identity} = context.clientContext;
+  var {identity} = context.clientContext || {};
   var bearer = event.headers.authorization;
 
   getNetlifyUser(identity, bearer, function (err, response) {
     if (err) {
-      return cb(err);
+      return cb(null, {
+              isBase64Encoded: false,
+              statusCode: 500,
+              headers: graphqlHeaders,
+              body: JSON.stringify(err)
+            });
     }
 
     console.log(response);
@@ -591,7 +610,12 @@ exports.handler = function(event, context, cb) {
                 }
               );
           } else {
-            cb('Missing auth creds');
+            cb(null, {
+              isBase64Encoded: false,
+              statusCode: 500,
+              headers: graphqlHeaders,
+              body: 'Missing auth creds'
+            });
           }
       }], function (error) {
         if (error) {

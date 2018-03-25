@@ -38,7 +38,7 @@ const ImageCaption = styled.div`
 
 export class EventImpl extends Component {
   state = {
-    camera: true,
+    camera: false,
     screen: false,
     isOpen: false,
     isRevealed: false
@@ -59,8 +59,6 @@ export class EventImpl extends Component {
   renderVideo() {
     const { session } = this.props.data.event;
     const currentUser = netlifyIdentity.currentUser();
-
-    console.log(session);
 
     return session && session.accessToken ? (
       <React.Fragment>
