@@ -4,7 +4,11 @@ query event($id: ID!) {
     title
     stream
     requests {
-      session {
+      cameraSession {
+        id
+        accessToken
+      }
+      screenSession {
         id
         accessToken
       }

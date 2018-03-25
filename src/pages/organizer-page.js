@@ -7,6 +7,8 @@ import { Subtitle } from "../components/typography";
 import { compose, graphql } from "react-apollo";
 import withLoadingSpinner from "../components/with-loading-spinner";
 import { OTSession, OTPublisher, OTStreams, OTSubscriber } from "opentok-react";
+import Button from "material-ui/Button";
+import startEventMutation from "./start-event.mutation.graphql";
 
 import { StagedStreamCard, ActiveStreamCard } from "../components/stream-card";
 
@@ -48,6 +50,10 @@ class SessionView extends Component {
 }
 
 class OrganizerView extends Component {
+  startBroadcast = () => {
+    this.props.startBroadcast(this.props.data.event.id);
+  };
+
   render() {
     console.log(this.props.data);
     const { session } = this.props.data.event;
@@ -55,7 +61,19 @@ class OrganizerView extends Component {
 
     return (
       <White>
-        <Header />
+        <Header
+          actions={
+            !session ? (
+              <Button
+                variant="raised"
+                color="primary"
+                onClick={this.startBroadcast}
+              >
+                Start Broadcast
+              </Button>
+            ) : null
+          }
+        />
         <Layout>
           <LayoutLeft>
             <Subtitle>Active stream</Subtitle>
@@ -68,9 +86,9 @@ class OrganizerView extends Component {
             <ProposedStreamList>
               {session &&
                 event.requests.map(request => (
-                  <StreamCardWrapper key={request.session.id}>
+                  <StreamCardWrapper key={request.cameraSession.id}>
                     <StagedStreamCard>
-                      <SessionView session={request.session} />
+                      <SessionView session={request.cameraSession} />
                     </StagedStreamCard>
                   </StreamCardWrapper>
                 ))}
@@ -89,6 +107,9 @@ export const OrganizerPage = compose(
         id: props.match.params.id
       }
     })
+  }),
+  graphql(startEventMutation, {
+    name: "startBroadcastMutation"
   }),
   withLoadingSpinner
 )(OrganizerView);

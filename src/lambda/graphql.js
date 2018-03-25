@@ -253,16 +253,16 @@ function mapEvents (events) {
       console.log(ev);
       return {
         id: ev.id,
-        title: ev.name && ev.name.html,
-        description: ev.description && ev.description.html,
+        title: ev.name && ev.name.text,
+        description: ev.description && ev.description.text,
         startingTime: ev.start && ev.start.utc,
       };
     });
   } else {
     return {
       id: events.id,
-      title: events.name.html,
-      description: events.description.html,
+      title: events.name.text,
+      description: events.description.text,
       startingTime: events.start.utc,
     };
   }
@@ -390,10 +390,10 @@ function getEvent (userToken, id, final_callback) {
       console.log(event)
       var result = {
         id: event.id,
-        title: event.name.html,
-        description: event.description && event.description.html,
+        title: event.name.text,
+        description: event.description && event.description.text,
         startingTime: event.start && event.start.utc,
-        stream: event.stream,
+        stream: session && session.stream,
         requests: response.map(function (req) {
           return {
             cameraSession: {
