@@ -216,11 +216,12 @@ function getEventbriteInfo(token, path, query, callback) {
 function mapEvents (events) {
   if (Array.isArray(events)) {
     return events.map(function (ev) {
+      console.log(ev);
       return {
         id: ev.id,
-        title: ev.name.html,
-        description: ev.description.html,
-        startingTime: ev.start.utc,
+        title: ev.name && ev.name.html,
+        description: ev.description && ev.description.html,
+        startingTime: ev.start && ev.start.utc,
       };
     });
   } else {
@@ -394,8 +395,8 @@ var root = {
             return {
               id: order.event_id,
               title: 'asd',
-              description: ev.description.html,
-              start: ev.start.utc,
+              description: 'another description',
+              start: 'soon-ish'
             };
           });
           resolve(mapEvents(response.orders));
