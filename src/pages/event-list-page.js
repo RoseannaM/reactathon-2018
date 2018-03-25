@@ -33,7 +33,7 @@ const Intro = styled.div`margin-bottom: 30px;`;
 class EventListPageView extends Component {
   render() {
     if (!this.props.data.ownedEvents || !this.props.data.joinedEvents) {
-      console.log(this.props.data)
+      console.log(this.props.data);
       return null;
     }
     return (
@@ -59,7 +59,11 @@ class EventListPageView extends Component {
             </EventCardList>
             <EventCardList title="Joined Events">
               {this.props.data.joinedEvents.map(event => (
-                <EventCard key={event.id} title={event.title} href={"/event" + event.id} />
+                <EventCard
+                  key={event.id}
+                  title={event.title}
+                  href={"/event" + event.id}
+                />
               ))}
               {/* <a href="/event" class="btn btn-primary btn-lg active" role="button">
               <Button style={styledBtn} size="small" variant="raised" color="primary" >

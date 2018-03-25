@@ -169,7 +169,9 @@ export class EventImpl extends Component {
             <Center>{this.renderVideo()}</Center>
           </LayoutMiddle>
         </Layout>
-        <Overlay isRevealed={this.state.isRevealed} />
+        <Overlay
+          isRevealed={this.state.isRevealed || this.props.data.event.session}
+        />
         {this.state.request ? (
           <div style={{ display: "none" }}>
             {this.state.camera ? (
@@ -207,6 +209,7 @@ export class EventImpl extends Component {
 export const Event = compose(
   graphql(eventQuery, {
     options: props => ({
+      pollInterval: 5000,
       variables: {
         id: props.match.params.id
       }
