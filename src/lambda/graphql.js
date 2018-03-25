@@ -34,6 +34,28 @@ function getUser(dbToken, userToken, cb) {
   }, cb);
 }
 
+function getEventbriteUser(userToken, callback) {
+  request({
+    url: 'https://www.eventbriteapi.com/v3/users/me',
+    method: 'GET',
+    qs: {
+      token:userToken
+    }
+  }, function (error, response, body) {
+    console.log(error, response, body);
+    if (error) {
+      callback(error);
+    }
+    else if (response.statusCode != 200) {
+      callback(response);
+    }
+    else {
+      body.token = userToken;
+      callback(null, body);
+    }
+  });
+};
+
 function addUser(dbToken, user, userToken, callback) {
   console.log('user info', user, userToken);
   request({
@@ -185,7 +207,12 @@ exports.handler = function(event, context, cb) {
       },
       function(response, callback) {
         console.log(response);
-        addUser(hasura_database_password, 'username', response.access_token, callback);
+        getEventbriteUser(response.access_token, callback);
+      },
+      function(response, callback) {
+        console.log('introspection successful');
+        console.log(response);
+        addUser(hasura_database_password, response.name, response.token, callback);
       },
       function(response, callback) {
         console.log(response);
