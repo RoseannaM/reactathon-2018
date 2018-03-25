@@ -2,9 +2,13 @@ query events {
   ownedEvents {
     id
     title
+    description
+    startingTime
   }
   joinedEvents {
     id
     title
+    description
+    startingTime
   }
 }

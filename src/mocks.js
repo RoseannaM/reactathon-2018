@@ -7,18 +7,36 @@ const mocks = {
     ownedEvents: () => [
       {
         id: "foo",
-        title: "Reactathon 2018",
-        description: "This is an event about stuff"
+        title: "Blah",
+        startingTime: "12 March",
+        description: "This is the event description"
       },
-      { id: "bar", accessToken: "secret", title: "Blah2" }
+      {
+        id: "bar",
+        accessToken: "secret",
+        startingTime: "12 March",
+        description: "This is the event description",
+        title: "Blah2"
+      }
       // { id: "jj", title: "ss" },
       // { id: "hv", accessToken: "secret", title: "gg" },
       // { id: "fr55ssf", title: "wowowowowoowowowow dogggggeee expo" },
       // { id: "hv", accessToken: "secret", title: "gg" }
     ],
     joinedEvents: () => [
-      { id: "foo", title: "Blah" },
-      { id: "bar", accessToken: "secret", title: "Blah2" }
+      {
+        id: "foo",
+        title: "Blah",
+        startingTime: "12 March",
+        description: "This is the event description"
+      },
+      {
+        id: "bar",
+        accessToken: "secret",
+        startingTime: "12 March",
+        description: "This is the event description",
+        title: "Blah2"
+      }
       // { id: "jj", title: "ss" },
       // { id: "hv", accessToken: "secret", title: "gg" },
       // { id: "344", title: "wowowowowoowowowow dogggggeee expo" },
