@@ -9,6 +9,7 @@ import withLoadingSpinner from "../components/with-loading-spinner";
 import { OTSession, OTPublisher, OTStreams, OTSubscriber } from "opentok-react";
 import Button from "material-ui/Button";
 import startEventMutation from "./start-event.mutation.graphql";
+import selectStreamMutation from "./select-stream.mutation.graphql";
 
 import { StagedStreamCard, ActiveStreamCard } from "../components/stream-card";
 
@@ -31,6 +32,9 @@ const StreamCardWrapper = styled.div`
 
 class SessionView extends Component {
   render() {
+    if (!this.props.session.id || !this.props.session.accessToken) {
+      return null;
+    }
     return (
       <OTSession
         apiKey="46086982"
@@ -51,7 +55,20 @@ class SessionView extends Component {
 
 class OrganizerView extends Component {
   startBroadcast = () => {
-    this.props.startBroadcast(this.props.data.event.id);
+    this.props.startBroadcastMutation({
+      variables: {
+        id: this.props.data.event.id
+      }
+    });
+  };
+
+  selectStream = streamId => {
+    this.props.selectStream({
+      variables: {
+        sessionId: this.props.data.event.id,
+        userId: streamId
+      }
+    });
   };
 
   render() {
@@ -71,7 +88,11 @@ class OrganizerView extends Component {
               >
                 Start Broadcast
               </Button>
-            ) : null
+            ) : (
+              <Button variant="raised" color="primary">
+                Stop Broadcast
+              </Button>
+            )
           }
         />
         <Layout>
@@ -87,6 +108,15 @@ class OrganizerView extends Component {
               {session &&
                 event.requests.map(request => (
                   <StreamCardWrapper key={request.cameraSession.id}>
+                    <Button
+                      variant="raised"
+                      color="primary"
+                      onClick={() =>
+                        this.selectStream(`${request.user.id}-camera`)
+                      }
+                    >
+                      Promote
+                    </Button>
                     <StagedStreamCard>
                       <SessionView session={request.cameraSession} />
                     </StagedStreamCard>
@@ -110,6 +140,9 @@ export const OrganizerPage = compose(
   }),
   graphql(startEventMutation, {
     name: "startBroadcastMutation"
+  }),
+  graphql(selectStreamMutation, {
+    name: "selectStream"
   }),
   withLoadingSpinner
 )(OrganizerView);

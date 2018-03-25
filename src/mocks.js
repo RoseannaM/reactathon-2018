@@ -5,16 +5,38 @@ import typeDefs from "./schema.graphql";
 const mocks = {
   Query: () => ({
     ownedEvents: () => [
-      { id: "foo", title: "Blah", startingTime: '12 March', description: "This is the event description" },
-      { id: "bar", accessToken: "secret", startingTime: '12 March', description: "This is the event description", title: "Blah2" }
+      {
+        id: "foo",
+        title: "Blah",
+        startingTime: "12 March",
+        description: "This is the event description"
+      },
+      {
+        id: "bar",
+        accessToken: "secret",
+        startingTime: "12 March",
+        description: "This is the event description",
+        title: "Blah2"
+      }
       // { id: "jj", title: "ss" },
       // { id: "hv", accessToken: "secret", title: "gg" },
       // { id: "fr55ssf", title: "wowowowowoowowowow dogggggeee expo" },
       // { id: "hv", accessToken: "secret", title: "gg" }
     ],
     joinedEvents: () => [
-      { id: "foo", title: "Blah", startingTime: '12 March', description: "This is the event description", },
-      { id: "bar", accessToken: "secret", startingTime: '12 March', description: "This is the event description", title: "Blah2" }
+      {
+        id: "foo",
+        title: "Blah",
+        startingTime: "12 March",
+        description: "This is the event description"
+      },
+      {
+        id: "bar",
+        accessToken: "secret",
+        startingTime: "12 March",
+        description: "This is the event description",
+        title: "Blah2"
+      }
       // { id: "jj", title: "ss" },
       // { id: "hv", accessToken: "secret", title: "gg" },
       // { id: "344", title: "wowowowowoowowowow dogggggeee expo" },
@@ -22,7 +44,8 @@ const mocks = {
     ],
     event: () => ({
       id: "foo",
-      title: "blah",
+      title: "Reactathon 2018",
+      description: "Interesting talks and great people!",
       requests: [],
       stream: "6e4c9b1f-1ab2-4616-af73-d84f4180b624-camera",
       session: {
