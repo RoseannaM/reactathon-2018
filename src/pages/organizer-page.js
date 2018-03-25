@@ -114,15 +114,10 @@ class OrganizerView extends Component {
                     request.user.id ===
                     "4818b197-0266-43eb-88c5-ac0fcc3731df" ? (
                       <StreamCardWrapper key={request.screenSession.id}>
-                        <Button
-                          variant="raised"
-                          color="primary"
-                          onClick={() =>
+                        <StagedStreamCard
+                          onPromote={() =>
                             this.selectStream(`${request.user.id}-screen`)}
                         >
-                          Promote
-                        </Button>
-                        <StagedStreamCard>
                           <SessionView
                             subscriberProperties={{
                               width: "150px",
@@ -134,15 +129,10 @@ class OrganizerView extends Component {
                       </StreamCardWrapper>
                     ) : (
                       <StreamCardWrapper key={request.cameraSession.id}>
-                        <Button
-                          variant="raised"
-                          color="primary"
-                          onClick={() =>
+                        <StagedStreamCard
+                          onPromote={() =>
                             this.selectStream(`${request.user.id}-camera`)}
                         >
-                          Promote
-                        </Button>
-                        <StagedStreamCard>
                           <SessionView
                             subscriberProperties={{
                               width: "150px",
