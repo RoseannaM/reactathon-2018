@@ -218,7 +218,7 @@ function introspect(api_key, api_secret, access_token, callback) {
 }
 
 function oauthDance(api_key, api_secret, access_token, user, final_callback) {
-  username = user.user || user;
+  username = user && user.user || user;
     async.waterfall([
       function(callback) {
         introspect(eventbrite_client_token, eventbrite_client_key, access_token, username, callback);
@@ -372,9 +372,9 @@ exports.handler = function(event, context, cb) {
   console.log(context);
   var access_token = event.queryStringParameters.code;
   var {identity, user} = context.clientContext;
-  user = 'nhiggins';
+  user = user || 'nhiggins';
 
-  if (!user && !access_token) {
+  if (!user && !access_token || event.httpMethod === 'OPTIONS') {
     return cb(null, {
       statusCode: 401,
       body: 'Missing user'
@@ -384,7 +384,7 @@ exports.handler = function(event, context, cb) {
       function (callback) {
         getUser(user, callback);
       }, function (response, callback) {
-        if (!access_token && (!response || !response[0] || !response[0].token)) {
+        if (event.httpMethod !== 'OPTIONS' && !access_token && (!response || !response[0] || !response[0].token)) {
           return cb(null, {
             isBase64Encoded: false,
             statusCode: 302,
@@ -393,9 +393,10 @@ exports.handler = function(event, context, cb) {
             },
             body: 'Hello World'
           });
-        } else if (access_token && (!response || !response[0] || !response[0].token)) {
+        } else if (event.httpMethod !== 'OPTIONS' && access_token && (!response || !response[0] || !response[0].token)) {
+          console.log(response);
           oauthDance(eventbrite_client_token, eventbrite_client_key, access_token, response && response[0] || user, callback);
-        } else if (response && response[0] && response[0].token) {
+        } else if (event.httpMethod === 'OPTIONS' || response && response[0] && response[0].token) {
           params = event.queryStringParameters.query;
           params.userToken = response[0].token;
           params.currentUserId = response[0].id;
