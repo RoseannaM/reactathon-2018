@@ -2,9 +2,9 @@ query event($id: ID!) {
   event(id: $id) {
     id
     title
+    stream
     session {
       id
-      stream
       accessToken
     }
   }
