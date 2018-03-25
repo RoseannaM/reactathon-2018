@@ -34,33 +34,7 @@ function getUser(dbToken, userToken, cb) {
   }, cb);
 }
 
-function getEventbriteUser(userToken, callback) {
-  request({
-    url: 'https://www.eventbriteapi.com/v3/users/me',
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    qs: {
-      token:userToken
-    }
-  }, function (error, response, body) {
-    console.log(error, response, body);
-    if (error) {
-      callback(error);
-    }
-    else if (response.statusCode != 200) {
-      callback(response);
-    }
-    else {
-      body.token = userToken;
-      callback(null, body);
-    }
-  });
-};
-
 function addUser(dbToken, user, userToken, callback) {
-  console.log('user info', user, userToken);
   request({
     url: url,
     method: 'POST',
@@ -69,7 +43,7 @@ function addUser(dbToken, user, userToken, callback) {
       Authorization: 'Bearer ' + dbToken
     },
     body: JSON.stringify({
-      type:'insert',
+      type:'upsert',
       args:{
         table:'oauth-tokens',
         objects:[
@@ -92,6 +66,58 @@ function addUser(dbToken, user, userToken, callback) {
   });
 }
 
+function getEventbriteUser(userToken, callback) {
+  request({
+    url: 'https://www.eventbriteapi.com/v3/users/me',
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    qs: {
+      token:userToken
+    }
+  }, function (error, response, body) {
+    console.log(error, response, body);
+    if (error) {
+      callback(error);
+    }
+    else if (response.statusCode != 200) {
+      response.token = userToken;
+      callback(response);
+    }
+    else {
+      body.token = userToken;
+      callback(null, body);
+    }
+  });
+};
+
+function getEventbriteInfo(token, path, query) {
+  return new Promise(function (resolve, reject) {
+    request({
+      url: 'https://www.eventbriteapi.com/v3' + path,
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+      qs: query
+    }, function (error, response, body) {
+      console.log(error, response, body);
+      if (error) {
+        reject(error);
+      }
+      else if (response.statusCode != 200) {
+        reject(response);
+      }
+      else {
+        resolve(body);
+      }
+    });
+
+  });
+}
+
 function introspect(api_key, api_secret, access_token, callback)
 {
 
@@ -101,8 +127,6 @@ function introspect(api_key, api_secret, access_token, callback)
       client_id: api_key,
       grant_type: 'authorization_code'
     });
-
-  console.log(body);
 
   request({
     url: 'https://www.eventbrite.com/oauth/token',
@@ -170,6 +194,8 @@ const schema = new GraphQLSchema({
   }),
 })
 
+
+
 exports.handler = function(event, context, cb) {
   console.log(event);
   var access_token = event.queryStringParameters.code;
@@ -209,12 +235,9 @@ exports.handler = function(event, context, cb) {
         introspect(eventbrite_client_token, eventbrite_client_key, access_token, callback);
       },
       function(response, callback) {
-        console.log(response);
         getEventbriteUser(response.access_token, callback);
       },
       function(response, callback) {
-        console.log('introspection successful');
-        console.log(response);
         addUser(hasura_database_password, response.name, response.token, callback);
       },
       function(response, callback) {
