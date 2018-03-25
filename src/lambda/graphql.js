@@ -476,7 +476,8 @@ exports.handler = function(event, context, cb) {
               userToken: response[0].token,
               currentUserId: response[0].id
             }
-            graphql(schema, event.body, root, context)
+            var body = JSON.parse(event.body);
+            graphql(schema, body.query, root, context, body.variables)
               .then(
                 function (result) { cb(null, {
                   statusCode: 200, body: JSON.stringify(result),
