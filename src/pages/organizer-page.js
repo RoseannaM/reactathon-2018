@@ -26,9 +26,7 @@ const ProposedStreamList = styled.div`
   flex-direction: column;
 `;
 
-const StreamCardWrapper = styled.div`
-  padding-bottom: 10px;
-`;
+const StreamCardWrapper = styled.div`padding-bottom: 10px;`;
 
 class SessionView extends Component {
   render() {
@@ -44,8 +42,7 @@ class SessionView extends Component {
         <OTStreams>
           <OTSubscriber
             properties={{
-              width: "800px",
-              height: "600px"
+              ...(this.props.subscriberProperties || {})
             }}
           />
         </OTStreams>
@@ -100,7 +97,12 @@ class OrganizerView extends Component {
           <LayoutLeft>
             <Subtitle>Active stream</Subtitle>
             <ActiveStreamCard>
-              {session ? <SessionView session={session} /> : null}
+              {session ? (
+                <SessionView
+                  subscriberProperties={{ width: "800px", height: "600px" }}
+                  session={session}
+                />
+              ) : null}
             </ActiveStreamCard>
           </LayoutLeft>
           <LayoutRight isOpen={true}>
@@ -116,13 +118,18 @@ class OrganizerView extends Component {
                           variant="raised"
                           color="primary"
                           onClick={() =>
-                            this.selectStream(`${request.user.id}-screen`)
-                          }
+                            this.selectStream(`${request.user.id}-screen`)}
                         >
                           Promote
                         </Button>
                         <StagedStreamCard>
-                          <SessionView session={request.screenSession} />
+                          <SessionView
+                            subscriberProperties={{
+                              width: "150px",
+                              height: "100px"
+                            }}
+                            session={request.screenSession}
+                          />
                         </StagedStreamCard>
                       </StreamCardWrapper>
                     ) : (
@@ -131,13 +138,18 @@ class OrganizerView extends Component {
                           variant="raised"
                           color="primary"
                           onClick={() =>
-                            this.selectStream(`${request.user.id}-camera`)
-                          }
+                            this.selectStream(`${request.user.id}-camera`)}
                         >
                           Promote
                         </Button>
                         <StagedStreamCard>
-                          <SessionView session={request.cameraSession} />
+                          <SessionView
+                            subscriberProperties={{
+                              width: "150px",
+                              height: "100px"
+                            }}
+                            session={request.cameraSession}
+                          />
                         </StagedStreamCard>
                       </StreamCardWrapper>
                     )
