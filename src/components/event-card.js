@@ -7,10 +7,7 @@ import InboxIcon from 'material-ui-icons/Inbox';
 import DraftsIcon from 'material-ui-icons/Drafts';
 import PropTypes from 'prop-types'
 
-// const mystyles = styled.div`
-//   color: pink;
-//   margin: 5px;
-// `
+
 const mystyles = {
   listItem: {
     color: 'pink',
