@@ -5,7 +5,7 @@ import { Title, Large } from "../components/typography";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import netlifyIdentity from "netlify-identity-widget";
-import logo from "../images/logo.png";
+import logo from "../images/logo-paint.png";
 
 window.netlifyIdentity = netlifyIdentity;
 // You must run this once before trying to interact with the widget
