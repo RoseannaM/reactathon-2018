@@ -5,7 +5,11 @@ import typeDefs from "./schema.graphql";
 const mocks = {
   Query: () => ({
     ownedEvents: () => [
-      { id: "foo", title: "Blah" },
+      {
+        id: "foo",
+        title: "Reactathon 2018",
+        description: "This is an event about stuff"
+      },
       { id: "bar", accessToken: "secret", title: "Blah2" }
       // { id: "jj", title: "ss" },
       // { id: "hv", accessToken: "secret", title: "gg" },
@@ -22,7 +26,8 @@ const mocks = {
     ],
     event: () => ({
       id: "foo",
-      title: "blah",
+      title: "Reactathon 2018",
+      description: "Interesting talks and great people!",
       requests: [],
       stream: "6e4c9b1f-1ab2-4616-af73-d84f4180b624-camera",
       session: {
