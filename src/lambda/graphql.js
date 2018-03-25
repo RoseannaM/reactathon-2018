@@ -400,11 +400,11 @@ var root = {
   }
 }
 
-function getNetlifyUser({url, token}, callback) {
+function getNetlifyUser({url}, bearer, callback) {
   request({
     url: url + '/user',
     headers: {
-      Authorization: 'Bearer ' + token
+      Authorization: bearer
     }
   }, function(error, response, body) {
     console.log(error, response, body);
@@ -436,8 +436,9 @@ exports.handler = function(event, context, cb) {
 
   var access_token = event.queryStringParameters.code;
   var {identity} = context.clientContext;
+  var bearer = event.headers.Authorization;
 
-  getNetlifyUser(identity, function (err, response) {
+  getNetlifyUser(identity, bearer, function (err, response) {
     if (err) {
       return cb(err);
     }
