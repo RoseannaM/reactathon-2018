@@ -34,31 +34,6 @@ function getUser(dbToken, userToken, cb) {
   }, cb);
 }
 
-function getEventbriteUser(userToken, callback) {
-  request({
-    url: 'https://www.eventbriteapi.com/v3/users/me',
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    qs: {
-      token:userToken
-    }
-  }, function (error, response, body) {
-    console.log(error, response, body);
-    if (error) {
-      callback(error);
-    }
-    else if (response.statusCode != 200) {
-      callback(response);
-    }
-    else {
-      body.token = userToken;
-      callback(null, body);
-    }
-  });
-};
-
 function addUser(dbToken, user, userToken, callback) {
   request({
     url: url,
@@ -68,7 +43,7 @@ function addUser(dbToken, user, userToken, callback) {
       Authorization: 'Bearer ' + dbToken
     },
     body: JSON.stringify({
-      type:'insert',
+      type:'upsert',
       args:{
         table:'oauth-tokens',
         objects:[
@@ -88,6 +63,58 @@ function addUser(dbToken, user, userToken, callback) {
     else {
       callback(null, body);
     }
+  });
+}
+
+function getEventbriteUser(userToken, callback) {
+  request({
+    url: 'https://www.eventbriteapi.com/v3/users/me',
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    qs: {
+      token:userToken
+    }
+  }, function (error, response, body) {
+    console.log(error, response, body);
+    if (error) {
+      callback(error);
+    }
+    else if (response.statusCode != 200) {
+      response.token = userToken;
+      callback(response);
+    }
+    else {
+      body.token = userToken;
+      callback(null, body);
+    }
+  });
+};
+
+function getEventbriteInfo(token, path, query) {
+  return new Promise(function (resolve, reject) {
+    request({
+      url: 'https://www.eventbriteapi.com/v3' + path,
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+      qs: query
+    }, function (error, response, body) {
+      console.log(error, response, body);
+      if (error) {
+        reject(error);
+      }
+      else if (response.statusCode != 200) {
+        reject(response);
+      }
+      else {
+        resolve(body);
+      }
+    });
+
   });
 }
 
@@ -167,6 +194,8 @@ const schema = new GraphQLSchema({
   }),
 })
 
+
+
 exports.handler = function(event, context, cb) {
   console.log(event);
   var access_token = event.queryStringParameters.code;
@@ -206,20 +235,9 @@ exports.handler = function(event, context, cb) {
         introspect(eventbrite_client_token, eventbrite_client_key, access_token, callback);
       },
       function(response, callback) {
-        console.log(response);
-        return cb(null, {
-          isBase64Encoded: false,
-          statusCode: 200,
-          headers: {
-            'Bearer': response.token,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(response)
-        })
         getEventbriteUser(response.access_token, callback);
       },
       function(response, callback) {
-        console.log(response);
         addUser(hasura_database_password, response.name, response.token, callback);
       },
       function(response, callback) {
