@@ -209,7 +209,9 @@ exports.handler = function(event, context, cb) {
         console.log(response);
         callback();
       }, function (response, callback) {
-        graphql(schema, event.queryStringParameters.query)
+        params = event.queryStringParameters.query;
+        params.token = bearer;
+        graphql(schema, params)
           .then(
             function (result) { cb(null, {statusCode: 200, body: JSON.stringify(result)})},
             function (err) { cb(err) }
