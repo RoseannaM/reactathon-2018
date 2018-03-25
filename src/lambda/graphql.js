@@ -19,7 +19,7 @@ var opentokApiKey = process.env.OPENTOK_API_KEY;
 var opentokApiSecret = process.env.OPENTOK_API_SECRET;
 var url = "https://data.continental75.hasura-app.io/v1/query";
 
-var openTokClient = new OpenTok(opentokApiKey, opentokApiSecret);
+var opentokClient = new OpenTok(opentokApiKey, opentokApiSecret);
 
 var graphqlHeaders = {
   'Access-Control-Allow-Origin': 'http://localhost:3000',
@@ -98,7 +98,20 @@ function createSession(session, event, callback) {
       objects:[
         { event_id: event, session: session, title: 'Something' }
       ],
-      returning: ['event_id', 'session']
+      returning: ['event_id', 'session', 'id']
+    }
+  }, callback);
+}
+
+function createRequest(request, callback) {
+  dbRequest({
+    type:'insert',
+    args:{
+      table:'request',
+      objects:[
+        { event: request.event, user: request.user, camera: request.cameraSession, screen: request.screenSession }
+      ],
+      returning: ['event', 'user', 'camera', 'screen']
     }
   }, callback);
 }
@@ -187,15 +200,24 @@ function getEventbriteInfo(token, path, query, callback) {
   });
 }
 
-function mapEvents (response) {
-  return response.events.map(function (ev) {
+function mapEvents (events) {
+  if (Array.isArray(events)) {
+    return response.events.map(function (ev) {
+      return {
+        id: ev.id,
+        title: ev.name.html,
+        description: ev.description.html,
+        startingTime: ev.start.utc,
+      };
+    });
+  } else {
     return {
-      id: ev.id,
-      title: ev.name.html,
-      description: ev.description.html,
-      start: ev.start.utc,
+      id: events.id,
+      title: events.name.html,
+      description: events.description.html,
+      startingTime: events.start.utc,
     };
-  });
+  }
 }
 
 function introspect(api_key, api_secret, access_token, username, callback) {
@@ -261,32 +283,76 @@ type Query {
 type Mutation {
   startEvent(id: ID!): Event
   endEvent(id: ID!): Event
-  requestToStream(id: ID!): Event
+  requestToStream(id: ID!): Request
   selectStream(sessionId: ID!, userId: ID!): Event
 }
 
 type Event {
   id: ID!
   title: String!
+  startingTime: String!
+  description: String!
   session: Session
+  requests: [Request!]
 }
 
 type Session {
   id: ID!
-  requests: [Request!]
   accessToken: String
   stream: ID
 }
 
 type Request {
-  session: Session!
+  cameraSession: Session!
+  screenSession: Session!
   user: User!
 }
 
 type User {
   id: ID!
 }
+
 `);
+
+function getEvent (userToken, id, callback) {
+  let event, session;
+  async.waterfall([
+    function (callback) {
+      getEventbriteInfo(context, userToken, '/events/' + id, {}, callback);
+    }, function (response, callback) {
+      event = response;
+      getSessionByEvent(id, callback);
+    }, function (response, callback) {
+      session = response;
+      getRequestsForSession(session.session, callback);
+    }, function (response, callback) {
+      return {
+        id: event.id,
+        title: event.title.html,
+        session: {
+          id: session.session,
+          accessToken: session.accessToken
+        },
+        stream: event.stream,
+        requests: response.map(function (req) {
+          return {
+            cameraSession: {
+              id: req.camera
+            },
+            screenSession: {
+              id: req.screen
+            },
+            user: {
+              id: req.user
+            }
+          };
+        })
+      };
+    }
+  ], function (err) {
+    callback(err);
+  });
+}
 
 // The root provides the top-level API endpoints
 var root = {
@@ -295,9 +361,10 @@ var root = {
     return new Promise(function (resolve, reject) {
       async.waterfall([
         function (callback) {
-          getEventbriteInfo(context.userToken, '/users/' + context.currentUserId + '/ownedEvents', {}, callback);
+          getEventbriteInfo(context.userToken, '/users/' + context.currentUserId + '/owned_events', {}, callback);
         }, function (response, callback) {
-          resolve(mapEvents(response));
+          console.log(response.events);
+          resolve(mapEvents(response.events));
         }], function (error) { reject(error) });
     });
   },
@@ -307,7 +374,16 @@ var root = {
         function (callback) {
           getEventbriteInfo(context.userToken, '/users/' + context.currentUserId + '/orders', {}, callback)
         }, function (response, callback) {
-          resolve(mapEvents(response));
+          // TODO fix
+          var events = response.orders.map(function (order) {
+            return {
+              id: order.event_id,
+              title: 'asd',
+              description: ev.description.html,
+              start: ev.start.utc,
+            };
+          });
+          resolve(mapEvents(response.orders));
         }], function (error) { reject(error) });
     });
   },
@@ -315,11 +391,9 @@ var root = {
     return new Promise(function (resolve, reject) {
       async.waterfall([
         function (callback) {
-          getEventbriteInfo(context, userToken, '/events/search', {
-            'user.id': context.currentUserId
-          }, callback);
+          getEvent(context.userToken, id, callback);
         }, function (response, callback) {
-          resolve(mapEvents(response));
+          resolve(response);
         }], function (error) { reject(error) });
     });
   },
@@ -328,40 +402,67 @@ var root = {
       async.waterfall([
         function (callback) {
           opentokClient.createSession(function(err, session) {
-            if (err) resolve(err);
+            if (err) reject(err);
             else createSession(session.sessionId, id, callback);
           });
         }, function (response, callback) {
-          resolve(mapEvents(response)[0]);
+          getEvent(context.userToken, id, callback);
+        }, function (response, callback) {
+          resolve(response);
         }], function (error) { reject(err); });
     });
   },
   endEvent: function ({id}, context) {
-    return {
-            id: '1234',
-            title: 'dummy'
-          };
+    return { id: '1234', title: 'dummy' };
   },
   requestToStream: function({id}, context) {
+    var request;
     return new Promise(function (resolve, reject) {
       async.waterfall([
         function (callback) {
-          getEventbriteInfo(context.userToken, '/users/' + context.currentUserId + '/orders', {}, callback);
+        //   getEventbriteInfo(context.userToken, '/users/' + context.currentUserId + '/orders', {}, callback);
+        // }, function (response, callback) {
+        //   for (var order in response.events) {
+        //     if (order.id === id) {
+            getSessionByEvent(id, callback);
+            // }
+          // }
+          // callback('No event found for user ' + context.currentUserId);
         }, function (response, callback) {
-          for (var order in response) {
-            if (order.event_id === id) {
-              return getSessionByEvent(order.event_id, callback);
-            }
+          if (!response || response.length === 0) {
+            reject('No event found for id: ' + id);
           }
-          callback({
-            statusCode: 404, body: 'No event found for user ' + context.currentUserId
+          request = {
+            event: id,
+            user: currentUserId
+          };
+
+          opentokClient.createSession(function (err, session) {
+            if (err) reject(err);
+            else  {
+              request.cameraSession = session.sessionId;
+              opentokClient.createSession(function (err, session) {
+                if (err) reject(err);
+                else  {
+                  request.screenSession = session.sessionId;
+                  createRequest(request, callback);
+                }
+              });
+            }
           });
         }, function (response, callback) {
-          var sessionId = response[0].session;
-          var token = opentokClient.generateToken(sessionId);
           resolve({
-            id: response[0].event_id,
-            accessToken: token
+            cameraSession: {
+              accessToken: opentokClient.generateToken(request.cameraSession),
+              id: request.cameraSession
+            },
+            screenSession: {
+              accessToken: opentokClient.generateToken(request.screenSession),
+              id: request.screenSession
+            },
+            user: {
+              id: request.user
+            }
           });
         }], function (err) {
           reject(err);
@@ -486,7 +587,7 @@ exports.handler = function(event, context, cb) {
                 },
                 function (err) { 
                   console.error(err);
-                  cb(JSON.stringify(err));
+                  cb(null, { statusCode: 500, body: JSON.stringify(err) })
                 }
               );
           } else {
