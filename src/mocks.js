@@ -24,7 +24,7 @@ const mocks = {
       id: "foo",
       title: "blah",
       requests: [],
-      stream: "6e4c9b1f-1ab2-4616-af73-d84f4180b624",
+      stream: "6e4c9b1f-1ab2-4616-af73-d84f4180b624-camera",
       session: {
         id:
           "1_MX40NjA4Njk4Mn5-MTUyMTk0MTUwNTAzOX5wbnZNYUJ0NmtaNzk3Sk5mT243UTRMeVh-fg",
@@ -36,7 +36,10 @@ const mocks = {
   Mutation: () => ({
     startEvent: () => {},
     endEvent: () => {},
-    requestToStream: () => {}
+    requestToStream: () => ({
+      cameraSession: {},
+      screenSession: {}
+    })
   })
 };
 
