@@ -169,16 +169,16 @@ function introspect(api_key, api_secret, access_token, callback)
 
 const schema =  buildSchema(`
 type Query {
-  ownedEvents: [Event!]!
-  joinedEvents: [Event!]!
-  event(id: ID!): Event
+  ownedEvents(currentUserId: String!, userToken: String!): [Event!]!
+  joinedEvents(currentUserId: String!, userToken: String!): [Event!]!
+  event(id: ID!, currentUserId: String!, userToken: String!): Event
 }
 
 type Mutation {
-  startEvent(id: ID!): Event
-  endEvent(id: ID!): Event
-  requestToStream(id: ID!): Event
-  selectStream(sessionId: ID!, userId: ID!): Event
+  startEvent(id: ID!, currentUserId: String!, userToken: String!): Event
+  endEvent(id: ID!, currentUserId: String!, userToken: String!): Event
+  requestToStream(id: ID!, currentUserId: String!, userToken: String!): Event
+  selectStream(sessionId: ID!, userId: ID!, currentUserId: String!, userToken: String!): Event
 }
 
 type Event {
@@ -201,8 +201,16 @@ type User {
 
 // The root provides the top-level API endpoints
 var root = {
-  getDie: function ({numSides}) {
-    return 6;
+  ownedEvents: function ({currentUserId, userToken}) {
+    return getEventbriteInfo(userToken, '/users/' + currentUserId + '/ownedEvents', {});
+  },
+  joinedEvents: function ({currentUserId, userToken}) {
+    return getEventbriteInfo(userToken, '/users/' + currentUserId + '/orders', {});
+  },
+  event: function ({currentUserId, userToken, id}) {
+    return getEventbriteInfo(userToken, '/events/search', {
+      'user.id': currentUserId
+    });
   }
 }
 
@@ -213,10 +221,11 @@ exports.handler = function(event, context, cb) {
   var bearer = event.headers.Authorization && event.headers.Authorization.split(' ')[1];
 
   if (bearer) {
-    getUser(hasura_database_password, bearer, function (err, resp) {
-      console.log(err, resp);
-      cb(err, {statusCode: 200, body: JSON.stringify(resp)});
-    });
+    context.success({ statusCode: '200', body: bearer})
+    // getUser(hasura_database_password, bearer, function (err, resp) {
+    //   console.log(err, resp);
+    //   cb(err, {statusCode: 200, body: JSON.stringify(resp)});
+    // });
     // async.waterfall([
     //   function (callback) {
     //     getUser(hasura_database_password, bearer, callback);
@@ -231,8 +240,8 @@ exports.handler = function(event, context, cb) {
     //     });
     //   }, function (response, callback) {
     //     params = event.queryStringParameters.query;
-    //     params.token = bearer;
-    //     params.user_id = response[0].id;
+    //     params.userToken = bearer;
+    //     params.currentUserId = response[0].id;
     //     console.log(params);
     //     graphql(schema, params)
     //       .then(
