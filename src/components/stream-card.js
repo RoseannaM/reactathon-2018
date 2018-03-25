@@ -50,14 +50,19 @@ const ActiveStreamActions = styled.div`
   position: absolute;
   right: 0;
   height: 100%;
-  width: 30px;
-  background-color: rbba(0, 0, 0, 0.5);
+  width: 50px;
+  background-color: rgba(0, 0, 0, 0.5);
   color: white;
+  transition: background-color 200ms;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 1);
+  }
 `;
 
 export const ActiveStreamCard = () => (
   <ActiveStreamWrapper>
-    <ActiveStreamActions>X</ActiveStreamActions>
     <ActiveStream />
+    <ActiveStreamActions>X</ActiveStreamActions>
   </ActiveStreamWrapper>
 );
