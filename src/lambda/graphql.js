@@ -34,7 +34,7 @@ function getUser(dbToken, userToken, cb) {
   }, cb);
 }
 
-function addUser(dbToken, user, userToken, callback) {
+function addUser(dbToken, user, userToken, id, callback) {
   request({
     url: url,
     method: 'POST',
@@ -47,9 +47,9 @@ function addUser(dbToken, user, userToken, callback) {
       args:{
         table:'oauth-tokens',
         objects:[
-          { user: user, token: userToken }
+          { user: user, token: userToken, id: id }
         ],
-        returning: ['user', 'token']
+        returning: ['user', 'token', 'id']
       }
     })
   }, function(error, response, body) {
@@ -82,7 +82,7 @@ function getEventbriteUser(userToken, callback) {
       callback(error);
     }
     else if (response.statusCode != 200) {
-      response.token = userToken;
+      response.token = userToken || 'token undefined';
       callback(response);
     }
     else {
@@ -145,7 +145,7 @@ function introspect(api_key, api_secret, access_token, callback)
       callback(response);
     }
     else {
-      callback(null, body);
+      callback(null, typeof body === 'string' ? JSON.parse(body) : body);
     }
   });
 }
@@ -179,7 +179,7 @@ const getGreeting = function (firstName) { return `Hello, ${firstName}.` }
 // Here we declare the schema and resolvers for the query
 const schema = new GraphQLSchema({
   query: new GraphQLObjectType({
-    name: 'RootQueryType', // an arbitrary name
+    name: 'ownerEvents',
     fields: {
       // the query has a field called 'greeting'
       greeting: {
@@ -238,7 +238,7 @@ exports.handler = function(event, context, cb) {
         getEventbriteUser(response.access_token, callback);
       },
       function(response, callback) {
-        addUser(hasura_database_password, response.name, response.token, callback);
+        addUser(hasura_database_password, response.name, response.token, response.id, callback);
       },
       function(response, callback) {
         console.log(response);
