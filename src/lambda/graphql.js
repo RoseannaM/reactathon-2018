@@ -3,7 +3,8 @@ const {
   GraphQLSchema,
   GraphQLObjectType,
   GraphQLString,
-  GraphQLNonNull
+  GraphQLNonNull,
+  buildSchema
 } = require('graphql')
 
 var async   = require('async');
@@ -15,7 +16,7 @@ var eventbrite_client_key= process.env.EVENTBRITE_CLIENT_KEY;
 var hasura_database_password = process.env.HASURA_DATABASE_PASSWORD;
 var url = "https://data.continental75.hasura-app.io/v1/query";
 
-function getUser(dbToken, userToken, cb) {
+function getUser(dbToken, userToken, callback) {
   request({
     url: url,
     method: 'POST',
@@ -31,11 +32,22 @@ function getUser(dbToken, userToken, cb) {
         where: { token: { '$eq': userToken }}
       }
     })
-  }, cb);
+  }, function(error, response, body) {
+    console.log(error, response, body);
+    if (error) {
+      callback(error);
+    }
+    else if (response.statusCode != 200) {
+      callback(response);
+    }
+    else {
+      body = typeof body === 'string' ? JSON.parse(body) : body;
+      callback(null, body);
+    }
+  });
 }
 
-function addUser(dbToken, user, userToken, callback) {
-  console.log(user, userToken);
+function addUser(dbToken, user, userToken, id, callback) {
   request({
     url: url,
     method: 'POST',
@@ -48,9 +60,9 @@ function addUser(dbToken, user, userToken, callback) {
       args:{
         table:'oauth-tokens',
         objects:[
-          { user: user, token: userToken }
+          { user: user, token: userToken, id: id }
         ],
-        returning: ['user', 'token']
+        returning: ['user', 'token', 'id']
       }
     })
   }, function(error, response, body) {
@@ -62,8 +74,63 @@ function addUser(dbToken, user, userToken, callback) {
       callback(response);
     }
     else {
+      body = typeof body === 'string' ? JSON.parse(body) : body;
       callback(null, body);
     }
+  });
+}
+
+function getEventbriteUser(userToken, callback) {
+  request({
+    url: 'https://www.eventbriteapi.com/v3/users/me',
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    qs: {
+      token:userToken
+    }
+  }, function (error, response, body) {
+    console.log(error, response, body);
+    if (error) {
+      callback(error);
+    }
+    else if (response.statusCode != 200) {
+      response.token = userToken || 'token undefined';
+      callback(response);
+    }
+    else {
+      body = typeof body === 'string' ? JSON.parse(body) : body;
+      body.token = userToken;
+      callback(null, body);
+    }
+  });
+};
+
+function getEventbriteInfo(token, path, query) {
+  return new Promise(function (resolve, reject) {
+    request({
+      url: 'https://www.eventbriteapi.com/v3' + path,
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+      qs: query
+    }, function (error, response, body) {
+      console.log(error, response, body);
+      if (error) {
+        reject(error);
+      }
+      else if (response.statusCode != 200) {
+        reject(response);
+      }
+      else {
+        body = typeof body === 'string' ? JSON.parse(body) : body;
+        resolve(body);
+      }
+    });
+
   });
 }
 
@@ -76,8 +143,6 @@ function introspect(api_key, api_secret, access_token, callback)
       client_id: api_key,
       grant_type: 'authorization_code'
     });
-
-  console.log(body);
 
   request({
     url: 'https://www.eventbrite.com/oauth/token',
@@ -96,7 +161,7 @@ function introspect(api_key, api_secret, access_token, callback)
       callback(response);
     }
     else {
-      callback(null, body);
+      callback(null, typeof body === 'string' ? JSON.parse(body) : body);
     }
   });
 }
@@ -127,23 +192,45 @@ function main(event, context, info)
 // This method just inserts the user's first name into the greeting message.
 const getGreeting = function (firstName) { return `Hello, ${firstName}.` }
 
-// Here we declare the schema and resolvers for the query
-const schema = new GraphQLSchema({
-  query: new GraphQLObjectType({
-    name: 'RootQueryType', // an arbitrary name
-    fields: {
-      // the query has a field called 'greeting'
-      greeting: {
-        // we need to know the user's name to greet them
-        args: { firstName: { name: 'firstName', type: new GraphQLNonNull(GraphQLString) } },
-        // the greeting message is a string
-        type: GraphQLString,
-        // resolve to a greeting message
-        resolve: function (parent, args) { return getGreeting(args.firstName) }
-      }
-    }
-  }),
-})
+const schema =  buildSchema(`
+type Query {
+  ownedEvents: [Event!]!
+  joinedEvents: [Event!]!
+  event(id: ID!): Event
+}
+
+type Mutation {
+  startEvent(id: ID!): Event
+  endEvent(id: ID!): Event
+  requestToStream(id: ID!): Event
+  selectStream(sessionId: ID!, userId: ID!): Event
+}
+
+type Event {
+  id: ID!
+  title: String!
+  session: Session
+}
+
+type Session {
+  id: ID!
+  requests: [User!]
+  accessToken: String
+  stream: ID
+}
+
+type User {
+  id: ID!
+}
+`);
+
+// The root provides the top-level API endpoints
+var root = {
+  getDie: function ({numSides}) {
+    return new RandomDie(numSides || 6);
+  }
+}
+
 
 exports.handler = function(event, context, cb) {
   console.log(event);
@@ -156,9 +243,12 @@ exports.handler = function(event, context, cb) {
         getUser(hasura_database_password, bearer, callback);
       }, function (response, callback) {
         console.log(response);
-        callback();
+        callback(response);
       }, function (response, callback) {
-        graphql(schema, event.queryStringParameters.query)
+        params = event.queryStringParameters.query;
+        params.token = bearer;
+        params.user_id = response[0].id;
+        graphql(schema, params)
           .then(
             function (result) { cb(null, {statusCode: 200, body: JSON.stringify(result)})},
             function (err) { cb(err) }
@@ -184,8 +274,10 @@ exports.handler = function(event, context, cb) {
         introspect(eventbrite_client_token, eventbrite_client_key, access_token, callback);
       },
       function(response, callback) {
-        console.log(response);
-        addUser(hasura_database_password, 'username', response.access_token, callback);
+        getEventbriteUser(response.access_token, callback);
+      },
+      function(response, callback) {
+        addUser(hasura_database_password, response.name, response.token, response.id, callback);
       },
       function(response, callback) {
         console.log(response);
@@ -202,7 +294,11 @@ exports.handler = function(event, context, cb) {
     ], function (error) {
       if (error) {
         // Something wrong has happened.
-        return cb(JSON.stringify(error));
+        return cb(null, {
+          isBase64Encoded: false,
+          statusCode: 500,
+          body: JSON.stringify(error)
+        });
       }
     });
   }

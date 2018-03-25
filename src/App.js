@@ -14,7 +14,35 @@ import { Organizer } from "./pages/organizer-view";
 import { theme } from "./theme.js";
 import { EventListPage } from "./pages/event-list-page";
 
+import netlifyIdentity from "netlify-identity-widget";
+import { loginUser, logoutUser } from "./identityActions";
+
 class App extends Component {
+  state = { user: null };
+
+  componentDidMount() {
+    const user = localStorage.getItem("currentCoolUser");
+
+    if (user) {
+      this.setState({ user: JSON.parse(user) });
+    } else {
+      loginUser();
+    }
+
+    netlifyIdentity.on("login", user => this.setState({ user }, loginUser()));
+    netlifyIdentity.on("logout", () =>
+      this.setState({ user: null }, logoutUser())
+    );
+  }
+
+  handleLogIn = () => {
+    netlifyIdentity.open();
+  };
+
+  handleLogOut = () => {
+    netlifyIdentity.logout();
+  };
+
   render() {
     return (
       <MuiThemeProvider theme={theme}>

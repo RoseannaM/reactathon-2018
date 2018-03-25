@@ -4002,6 +4002,12 @@ got@^6.7.1:
     unzip-response "^2.0.1"
     url-parse-lax "^1.0.0"
 
+gotrue-js@^0.9.20:
+  version "0.9.20"
+  resolved "https://registry.yarnpkg.com/gotrue-js/-/gotrue-js-0.9.20.tgz#64d99004d93b1005964f1d575076827258928426"
+  dependencies:
+    micro-api-client "^3.2.1"
+
 graceful-fs@^4.1.11, graceful-fs@^4.1.2, graceful-fs@^4.1.6, graceful-fs@^4.1.9:
   version "4.1.11"
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.1.11.tgz#0e8bdfe4d1ddb8854d64e04ea7c00e2a026e5658"
@@ -5785,6 +5791,10 @@ methods@~1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/methods/-/methods-1.1.2.tgz#5529a4d67654134edcc5266656835b0f851afcee"
 
+micro-api-client@^3.2.1:
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/micro-api-client/-/micro-api-client-3.2.2.tgz#cd34aaf72cf9c66b987c3563ecdbfa68abb85afc"
+
 micromatch@^2.3.11:
   version "2.3.11"
   resolved "https://registry.yarnpkg.com/micromatch/-/micromatch-2.3.11.tgz#86677c97d1720b363431d04d0d15293bd38c1565"
@@ -6268,6 +6278,16 @@ opencollective@^1.0.3:
     minimist "1.2.0"
     node-fetch "1.6.3"
     opn "4.0.2"
+
+opentok-react@^0.7.0:
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/opentok-react/-/opentok-react-0.7.0.tgz#8d97fc8076a9c7466bd9172e8a942275f73290f6"
+  dependencies:
+    lodash "^4.13.1"
+    prop-types "^15.5.10"
+    react-display-name "^0.2.0"
+    scriptjs "^2.5.8"
+    uuid "^3.0.1"
 
 opn@4.0.2:
   version "4.0.2"
@@ -6953,7 +6973,7 @@ promise@^7.1.1:
   dependencies:
     asap "~2.0.3"
 
-prop-types@^15.5.4, prop-types@^15.5.8, prop-types@^15.6.0:
+prop-types@^15.5.10, prop-types@^15.5.4, prop-types@^15.5.8, prop-types@^15.6.0:
   version "15.6.1"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.6.1.tgz#36644453564255ddda391191fb3a125cbdf654ca"
   dependencies:
@@ -7138,6 +7158,10 @@ react-dev-utils@6.0.0-next.b2fd8db8:
     sockjs-client "1.1.4"
     strip-ansi "4.0.0"
     text-table "0.2.0"
+
+react-display-name@^0.2.0:
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/react-display-name/-/react-display-name-0.2.3.tgz#f50204d430c9ca819bc0bade0306e9175d8d1987"
 
 react-dom@^16.2.0:
   version "16.2.0"
@@ -7767,6 +7791,10 @@ schema-utils@^0.4.2:
   dependencies:
     ajv "^6.1.0"
     ajv-keywords "^3.1.0"
+
+scriptjs@^2.5.8:
+  version "2.5.8"
+  resolved "https://registry.yarnpkg.com/scriptjs/-/scriptjs-2.5.8.tgz#d0c43955c2e6bad33b6e4edf7b53b8965aa7ca5f"
 
 scroll@^2.0.3:
   version "2.0.3"
