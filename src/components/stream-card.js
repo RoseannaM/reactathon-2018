@@ -21,7 +21,7 @@ export const StagedStreamCard = styled.div`
   padding-bottom: 75%;
   border: 1px solid black;
 
-  background-image: url("http://i0.kym-cdn.com/photos/images/original/000/581/296/c09.jpg");
+  background: black;
 `;
 
 const ActiveStreamWrapper = styled.div`
@@ -49,7 +49,7 @@ const ActiveStream = styled.div`
   width: 100%;
   height: 100%;
   position: absolute;
-  background-image: url("http://i0.kym-cdn.com/photos/images/original/000/581/296/c09.jpg");
+  background: black;
 `;
 
 const ActiveStreamActions = styled.div`
