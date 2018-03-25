@@ -209,12 +209,12 @@ exports.handler = function(event, context, cb) {
         console.log(response);
         return cb(null, {
           isBase64Encoded: false,
-          statusCode: 302,
+          statusCode: 200,
           headers: {
-            'Location': '/',
-            'Bearer': response.token
+            'Bearer': response.token,
+            'Content-Type': 'application/json'
           },
-          body: response
+          body: JSON.stringify(response)
         })
         getEventbriteUser(response.access_token, callback);
       },
