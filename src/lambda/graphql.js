@@ -186,13 +186,13 @@ function getEventbriteInfoPromise(token, path, query) {
   });
 };
 
-function introspect(api_key, api_secret, access_token, callback) {
+function introspect(api_key, api_secret, access_token, username, callback) {
   var body = querystring.stringify({
       code: access_token,
       client_secret: api_secret,
       client_id: api_key,
       grant_type: 'authorization_code',
-      state: 'some-user'
+      state: username
     });
 
   request({
