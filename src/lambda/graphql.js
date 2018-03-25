@@ -29,7 +29,7 @@ function dbRequest(reqBody, callback) {
       'Content-Type': 'application/json',
       Authorization: 'Bearer ' + hasura_database_password
     },
-    body: JSON.strinfigy(reqBody)
+    body: JSON.stringify(reqBody)
   }, function(error, response, body) {
     console.log(error, response, body);
     if (error) {
