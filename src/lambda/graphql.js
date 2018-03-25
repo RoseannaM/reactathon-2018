@@ -123,13 +123,14 @@ function createSession(session, event, final_callback) {
 }
 
 function setActiveStream(eventId, streamId, callback) {
+  console.log(eventId);
   dbRequest({
     type:'update',
     args:{
       table:'events',
       "$set": {"stream": streamId },
       where: {
-        id: id
+        event_id: eventId
       }
     }
   }, callback);
@@ -451,7 +452,7 @@ var root = {
               callback
           );
         }, function (response, callback) {
-          resolve(mapEvents(response));
+          resolve(response);
         }], function (error) { reject(error) });
     });
   },
@@ -560,14 +561,14 @@ var root = {
             getRequestsForEvent(eventId, callback);
           }
         }, function (response, callback) {
-          setActiveStream(eventId, usedId, callback);
+          setActiveStream(eventId, userId, callback);
         }, function (response, callback) {
           getEvent(context.userToken, eventId, callback);
         }, function (response, callback) {
           if (response) {
             resolve(response);
           } else {
-            reject('No event found with event id ' + id);
+            reject('No event found with eventId ' + eventId);
           }
         }], function (err) {
           reject(err)
