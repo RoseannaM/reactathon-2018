@@ -557,7 +557,12 @@ exports.handler = function(event, context, cb) {
 
   getNetlifyUser(identity, bearer, function (err, response) {
     if (err) {
-      return cb(err);
+      return cb(null, {
+              isBase64Encoded: false,
+              statusCode: 500,
+              headers: graphqlHeaders,
+              body: JSON.stringify(err)
+            });
     }
 
     console.log(response);
@@ -605,7 +610,12 @@ exports.handler = function(event, context, cb) {
                 }
               );
           } else {
-            cb('Missing auth creds');
+            cb(null, {
+              isBase64Encoded: false,
+              statusCode: 500,
+              headers: graphqlHeaders,
+              body: 'Missing auth creds'
+            });
           }
       }], function (error) {
         if (error) {
