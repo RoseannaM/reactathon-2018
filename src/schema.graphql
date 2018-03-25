@@ -17,13 +17,13 @@ type Event {
   startingTime: String!
   description: String!
   session: Session
+  stream: ID
   requests: [Request!]
 }
 
 type Session {
   id: ID!
   accessToken: String
-  stream: ID
 }
 
 type Request {
