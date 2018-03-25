@@ -59,7 +59,7 @@ class EventListPageView extends Component {
             </EventCardList>
             <EventCardList title="Joined Events">
               {this.props.data.joinedEvents.map(event => (
-                <EventCard key={event.id} title={event.title} href="#" />
+                <EventCard key={event.id} title={event.title} href={"/event" + event.id} />
               ))}
               {/* <a href="/event" class="btn btn-primary btn-lg active" role="button">
               <Button style={styledBtn} size="small" variant="raised" color="primary" >

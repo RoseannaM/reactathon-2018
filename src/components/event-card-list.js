@@ -5,6 +5,8 @@ import Divider from "material-ui/Divider";
 import InboxIcon from "material-ui-icons/Inbox";
 import DraftsIcon from "material-ui-icons/Drafts";
 import PropTypes from "prop-types";
+import Button from 'material-ui/Button';
+import Typography from 'material-ui/Typography';
 
 const styles = theme => ({
   root: {
@@ -17,7 +19,8 @@ const styles = theme => ({
 const mystyles = {
   cardtitle: {
     margin: "5px",
-    color: "#fff"
+    color: "#fff",
+    fontWeight: '300'
   },
   cardOuter: {
     display: "block",
@@ -32,10 +35,11 @@ const mystyles = {
 export class EventCardList extends Component {
   render() {
     const classes = this.props.classes;
+    
     return (
       <div style={mystyles.cardOuter}>
         <div className={classes.root}>
-          <h3 style={mystyles.cardtitle}>{this.props.title}</h3>
+          <h1 style={mystyles.cardtitle}>{this.props.title}</h1>
           <List component="nav" />
         </div>
         {this.props.children}
