@@ -480,7 +480,7 @@ exports.handler = function(event, context, cb) {
             graphql(schema, body.query, root, context, body.variables)
               .then(
                 function (result) { cb(null, {
-                  statusCode: 200, body: JSON.stringify(result),
+                  statusCode: 200, body: result,
                   headers: graphqlHeaders
                 })
                 },
