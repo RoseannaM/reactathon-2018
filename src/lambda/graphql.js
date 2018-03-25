@@ -186,12 +186,6 @@ function getEventbriteInfo(token, path, query, callback) {
   });
 }
 
-function getEventbriteInfoPromise(token, path, query) {
-  return new Promise(function (resolve) {
-    getEventbriteInfo(token, path, query, resolve);
-  });
-};
-
 function introspect(api_key, api_secret, access_token, username, callback) {
   var body = querystring.stringify({
       code: access_token,
@@ -290,7 +284,10 @@ var root = {
         function (callback) {
           getEventbriteInfo(context.userToken, '/users/' + context.currentUserId + '/ownedEvents', {}, callback);
         }, function (response, callback) {
-          resolve(response); // TODO
+          resolve(null, [{
+            id: '1234',
+            title: 'dummy'
+          }]);
         }], function (error) { resolve(error) });
     });
   },
@@ -298,9 +295,12 @@ var root = {
     return new Promise(function (resolve) {
       async.waterfall([
         function (callback) {
-          getEventbriteInfoPromise(context.userToken, '/users/' + context.currentUserId + '/orders', {}, callback)
+          getEventbriteInfo(context.userToken, '/users/' + context.currentUserId + '/orders', {}, callback)
         }, function (response, callback) {
-          resolve(response); // TODO
+          resolve(null, [{
+            id: '1234',
+            title: 'dummy'
+          }]);
         }], function (error) { resolve(error) });
     });
   },
@@ -312,7 +312,10 @@ var root = {
             'user.id': context.currentUserId
           }, callback);
         }, function (response, callback) {
-          resolve(response); // TODO
+          resolve(null, [{
+            id: '1234',
+            title: 'dummy'
+          }]);
         }], function (error) { resolve(error) });
     });
   },
@@ -325,12 +328,18 @@ var root = {
             else createSession(session.sessionId, id, callback);
           });
         }, function (response, callback) {
-          resolve(response); // TODO properly
+          resolve(null, {
+            id: '1234',
+            title: 'dummy'
+          });
         }], function (error) { resolve(err); });
     });
   },
   endEvent: function ({id}, context) {
-    return true;
+    return {
+            id: '1234',
+            title: 'dummy'
+          };
   },
   requestToStream: function({id}, context) {
     return new Promise(function (resolve) {
