@@ -1,9 +1,6 @@
-mutation selectStream($eventId: ID!, $userId: ID!) {
-  selectStream(eventId: $eventId, userId: $userId) {
+mutation selectStream($sessionId: ID!, $userId: ID!) {
+  selectStream(sessionId: $sessionId, userId: $userId) {
     id
-    session {
-      id
-      stream
-    }
+    stream
   }
 }
