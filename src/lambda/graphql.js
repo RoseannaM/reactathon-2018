@@ -218,7 +218,7 @@ function introspect(api_key, api_secret, access_token, callback) {
 }
 
 function oauthDance(api_key, api_secret, access_token, user, final_callback) {
-  username = user && user.user || user;
+  var username = user && user.user || user;
     async.waterfall([
       function(callback) {
         introspect(eventbrite_client_token, eventbrite_client_key, access_token, username, callback);
