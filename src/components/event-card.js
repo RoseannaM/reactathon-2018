@@ -27,6 +27,11 @@ const cardStyle = {
 
 export default class EventCard extends Component {
   render() {
+    const truncatedDescription = (this.props.desc || "").substring(0, 250);
+    const ellipsesDescription =
+      truncatedDescription.length === 250
+        ? truncatedDescription + "..."
+        : truncatedDescription;
     return (
       <div style={cardStyle.card}>
         <Card>
@@ -35,13 +40,7 @@ export default class EventCard extends Component {
               {this.props.title}
             </Typography>
             <Typography color="textSecondary">{this.props.date}</Typography>
-            <Typography component="p">
-              {this.props.desc ? (
-                this.props.desc.substring(0, 250) + " ..."
-              ) : (
-                " "
-              )}
-            </Typography>
+            <Typography component="p">{ellipsesDescription}</Typography>
           </CardContent>
           <CardActions>
             {!this.props.isExternal ? (
