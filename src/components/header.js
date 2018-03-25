@@ -28,7 +28,7 @@ export class Header extends React.Component {
         <Left>
           <Lockup />
         </Left>
-        <Right>Actions go here</Right>
+        <Right>{this.props.actions}</Right>
       </Wrapper>
     );
   }

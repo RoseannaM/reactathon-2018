@@ -5,7 +5,7 @@ import styled from "styled-components";
 import EventCardList from "../components/event-card-list";
 import EventCard from "../components/event-card";
 import { Header } from "../components/header";
-import { Layout, LayoutLeft, LayoutRight } from "../components/layout";
+import { Layout, LayoutLeft, LayoutRight, LayoutMiddle } from "../components/layout";
 
 import withLoadingSpinner from "../components/with-loading-spinner";
 
@@ -16,24 +16,32 @@ const White = styled.div`
   width: 100vw;
   height: 100vh;
 `;
+const Cardflex = styled.div`
+  display: flex;
+  flex-direction: row;
+`
 
 class EventListPageView extends Component {
   render() {
     return (
       <White>
-      <Header />
-      <Layout>
-        <EventCardList title="Owned Events">
-          {this.props.data.ownedEvents.map(event => (
-            <EventCard key={event.id} event={event} />
-          ))}
-        </EventCardList>
-        <EventCardList title="Joined Events">
-          {this.props.data.joinedEvents.map(event => (
-            <EventCard key={event.id} event={event} />
-          ))}
-        </EventCardList>
-      </Layout>
+        <Header />
+        <Layout>
+          <LayoutMiddle>
+            <Cardflex>
+            <EventCardList title="Owned Events">
+              {this.props.data.ownedEvents.map(event => (
+                <EventCard key={event.id} event={event} />
+              ))}
+            </EventCardList>
+            <EventCardList title="Joined Events">
+              {this.props.data.joinedEvents.map(event => (
+                <EventCard key={event.id} event={event} />
+              ))}
+            </EventCardList>
+            </Cardflex>
+          </LayoutMiddle>
+        </Layout>
       </White>
     );
   }

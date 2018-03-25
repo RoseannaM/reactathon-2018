@@ -11,6 +11,8 @@ import withLoadingSpinner from "../components/with-loading-spinner";
 import { OTSession, OTPublisher, OTStreams, OTSubscriber } from "opentok-react";
 import { MainStreamCard } from "../components/stream-card";
 import netlifyIdentity from "netlify-identity-widget";
+import Menu, { MenuItem } from "material-ui/Menu";
+import { BroadcastActions } from "../components/broadcast-actions";
 
 const Black = styled.div`
   margin: 0;
@@ -22,7 +24,7 @@ const Black = styled.div`
 const Center = styled.div`
   display: flex;
   width: 100%;
-  height: 100%;
+  justify-content: center;
 `;
 
 export class EventImpl extends Component {
@@ -106,12 +108,17 @@ export class EventImpl extends Component {
   render() {
     return (
       <Black>
-        <Header />
+        <Header
+          actions={
+            <BroadcastActions
+              toggleCamera={this.toggleCamera}
+              toggleScreen={this.toggleScreen}
+            />
+          }
+        />
         <Layout>
           <LayoutMiddle>
-            <button onClick={this.toggleCamera}>Camera</button>
-            <button onClick={this.toggleScreen}>Screen</button>
-            {this.renderVideo()}
+            <Center>{this.renderVideo()}</Center>
           </LayoutMiddle>
         </Layout>
         <Overlay isRevealed={this.state.isRevealed} />
