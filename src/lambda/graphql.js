@@ -436,7 +436,7 @@ exports.handler = function(event, context, cb) {
 
   var access_token = event.queryStringParameters.code;
   var {identity} = context.clientContext;
-  var bearer = event.headers.Authorization;
+  var bearer = event.headers.Authorization || event.body;
 
   getNetlifyUser(identity, bearer, function (err, response) {
     if (err) {
