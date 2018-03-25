@@ -357,6 +357,7 @@ exports.handler = function(event, context, cb) {
   console.log(context);
   var access_token = event.queryStringParameters.code;
   var {identity, user} = context.clientContext;
+  user = 'nhiggins';
 
   if (!user && !access_token) {
     return cb(null, {
