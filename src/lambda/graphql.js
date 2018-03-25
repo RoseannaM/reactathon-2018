@@ -65,18 +65,17 @@ function getUser(userToken, callback) {
 }
 
 function addUser(user, userToken, id, callback) {
-  if (typeof user === 'string') {
-    dbRequest({
-      type:'insert',
-      args:{
-        table:'oauth-tokens',
-        objects:[
-          { user: user, token: userToken, id: id }
-        ],
-        returning: ['user', 'token', 'id']
-      }
-    }, callback);
-  } else {
+  dbRequest({
+    type:'insert',
+    args:{
+      table:'oauth-tokens',
+      objects:[
+        { user: user, token: userToken, id: id }
+      ],
+      returning: ['user', 'token', 'id']
+    }
+  }, function (err, response) {
+    if (!err) return callback(null, response);
     dbRequest({
       type:'update',
       args:{
@@ -88,7 +87,7 @@ function addUser(user, userToken, id, callback) {
         returning: ['user', 'token', 'id']
       }
     }, callback);
-  }
+  });
 }
 
 function createSession(session, event, callback) {
@@ -234,7 +233,7 @@ function oauthDance(api_key, api_secret, access_token, user, final_callback) {
         getEventbriteUser(response.access_token, callback);
       },
       function(response, callback) {
-        addUser(user, response.token, response.id, callback);
+        addUser(username, response.token, response.id, callback);
       },
       function(response, callback) {
         return final_callback(null, {
