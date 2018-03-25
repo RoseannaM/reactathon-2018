@@ -16,10 +16,7 @@ const White = styled.div`
   width: 100vw;
   height: 100vh;
 `;
-const Cardflex = styled.div`
-  display: flex;
-  flex-direction: row;
-`
+
 
 class EventListPageView extends Component {
   render() {
@@ -28,7 +25,6 @@ class EventListPageView extends Component {
         <Header />
         <Layout>
           <LayoutMiddle>
-            <Cardflex>
             <EventCardList title="Owned Events">
               {this.props.data.ownedEvents.map(event => (
                 <EventCard key={event.id} event={event} />
@@ -39,7 +35,6 @@ class EventListPageView extends Component {
                 <EventCard key={event.id} event={event} />
               ))}
             </EventCardList>
-            </Cardflex>
           </LayoutMiddle>
         </Layout>
       </White>

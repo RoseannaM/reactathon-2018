@@ -17,12 +17,14 @@ const styles = theme => ({
 
 const mystyles = {
   cardtitle: {
-    margin: '5px'
+    margin: '5px',
+    color: '#9d00db',
   },
   cardOuter: {
+    border: 'solid black 1px',
     display: 'block',
     color: 'red',
-    margin: 'auto'
+    margin: '5px'
   }
 }
 

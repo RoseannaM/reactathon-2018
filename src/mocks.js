@@ -6,19 +6,19 @@ const mocks = {
   Query: () => ({
     ownedEvents: () => [
       { id: "foo", title: "Blah" },
-      { id: "bar", accessToken: "secret", title: "Blah2" },
-      { id: "jj", title: "ss" },
-      { id: "hv", accessToken: "secret", title: "gg" },
-      { id: "fr55ssf", title: "wowowowowoowowowow dogggggeee expo" },
-      { id: "hv", accessToken: "secret", title: "gg" }
+      // { id: "bar", accessToken: "secret", title: "Blah2" },
+      // { id: "jj", title: "ss" },
+      // { id: "hv", accessToken: "secret", title: "gg" },
+      // { id: "fr55ssf", title: "wowowowowoowowowow dogggggeee expo" },
+      // { id: "hv", accessToken: "secret", title: "gg" }
     ],
     joinedEvents: () => [
       { id: "foo", title: "Blah" },
       { id: "bar", accessToken: "secret", title: "Blah2" },
-      { id: "jj", title: "ss" },
-      { id: "hv", accessToken: "secret", title: "gg" },
-      { id: "344", title: "wowowowowoowowowow dogggggeee expo" },
-      { id: "aad", title: "sorrrry dogggggeee expo" }
+      // { id: "jj", title: "ss" },
+      // { id: "hv", accessToken: "secret", title: "gg" },
+      // { id: "344", title: "wowowowowoowowowow dogggggeee expo" },
+      // { id: "aad", title: "sorrrry dogggggeee expo" }
     ],
     event: () => ({
       id: "foo",

@@ -10,8 +10,9 @@ import PropTypes from 'prop-types'
 
 const mystyles = {
   listItem: {
-    color: 'pink',
-    margin: '5px'
+    color: 'black',
+    margin: '5px',
+    padding: '5px'
   }
 }
 
