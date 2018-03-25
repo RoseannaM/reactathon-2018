@@ -7,7 +7,7 @@ export class Timer extends React.Component {
     this.state = {
       eventTime: Date.now() + 3000
     };
-    setTimeout(() => this.forceUpdate(), 1000);
+    setInterval(() => this.forceUpdate(), 1000);
   }
   render() {
     const timeLeft = Math.max(
