@@ -374,7 +374,7 @@ exports.handler = function(event, context, cb) {
   var {identity, user} = context.clientContext;
   user = user || 'nhiggins';
 
-  if (!user && !access_token || event.httpMethod === 'OPTIONS') {
+  if (!user && !access_token || event.httpMethod !== 'OPTIONS') {
     return cb(null, {
       statusCode: 401,
       body: 'Missing user'
