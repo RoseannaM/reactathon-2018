@@ -59,7 +59,7 @@ function getUser(userToken, callback) {
       args: {
         table: 'oauth-tokens',
         columns: ['*'],
-        where: { token: { '$eq': userToken }}
+        where: { user: { '$eq': userToken }}
       }
     }, callback);
 }
@@ -458,7 +458,7 @@ exports.handler = function(event, context, cb) {
         }, function (response, callback) {
           if (access_token && user) {
             oauthDance(eventbrite_client_token, eventbrite_client_key, access_token, user, callback);
-          } else if (!access_token && (!response || !response[0] || !response[0].token)) {
+          } else if (!access_token && !(response && response[0] && response[0].token)) {
             var headers = graphqlHeaders;
             headers.Location = 'https://www.eventbrite.com/oauth/authorize?response_type=code&client_id=' + eventbrite_client_token
             return cb(null, {
