@@ -42,8 +42,7 @@ class SessionView extends Component {
         <OTStreams>
           <OTSubscriber
             properties={{
-              width: "800px",
-              height: "600px"
+              ...(this.props.subscriberProperties || {})
             }}
           />
         </OTStreams>
@@ -98,7 +97,12 @@ class OrganizerView extends Component {
           <LayoutLeft>
             <Subtitle>Active stream</Subtitle>
             <ActiveStreamCard>
-              {session ? <SessionView session={session} /> : null}
+              {session ? (
+                <SessionView
+                  subscriberProperties={{ width: "800px", height: "600px" }}
+                  session={session}
+                />
+              ) : null}
             </ActiveStreamCard>
           </LayoutLeft>
           <LayoutRight isOpen={true}>
@@ -116,7 +120,13 @@ class OrganizerView extends Component {
                       Promote
                     </Button>
                     <StagedStreamCard>
-                      <SessionView session={request.cameraSession} />
+                      <SessionView
+                        subscriberProperties={{
+                          width: "150px",
+                          height: "100px"
+                        }}
+                        session={request.cameraSession}
+                      />
                     </StagedStreamCard>
                   </StreamCardWrapper>
                 ))}

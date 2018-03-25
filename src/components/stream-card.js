@@ -3,6 +3,7 @@ import React from "react";
 
 import IconButton from "material-ui/IconButton";
 import StopIcon from "material-ui-icons/Stop";
+import StarIcon from "material-ui-icons/Star";
 import Tooltip from "material-ui/Tooltip";
 
 const blink = keyframes`
@@ -15,14 +16,35 @@ const blink = keyframes`
   }
 `;
 
-export const StagedStreamCard = styled.div`
+export const StagedStreamCardWrapper = styled.div`
+  width: 800px;
+  height: 600px;
+  position: relative;
+
+  box-shadow: 0 0 0 1px rgba(20, 11, 47, 0.05),
+    0 2px 16px -2px rgba(0, 0, 0, 0.1);
+`;
+
+export const StagedStreamCardInner = styled.div`
   width: 100%;
   max-height: 200px;
   padding-bottom: 75%;
   border: 1px solid black;
-
   background: black;
 `;
+
+export const StagedStreamCard = props => (
+  <StagedStreamCardWrapper>
+    <StagedStreamCardInner>{props.children}</StagedStreamCardInner>
+    <StreamActions>
+      <Tooltip id="tooltip-top-start" title="Promote stream" placement="right">
+        <IconButton aria-label="Promote" style={{ color: "white" }}>
+          <StarIcon />
+        </IconButton>
+      </Tooltip>
+    </StreamActions>
+  </StagedStreamCardWrapper>
+);
 
 const ActiveStreamWrapper = styled.div`
   width: 800px;
@@ -52,7 +74,7 @@ const ActiveStream = styled.div`
   background: black;
 `;
 
-const ActiveStreamActions = styled.div`
+const StreamActions = styled.div`
   position: absolute;
   right: 0;
   height: 50px;
@@ -69,13 +91,13 @@ const ActiveStreamActions = styled.div`
 export const ActiveStreamCard = props => (
   <ActiveStreamWrapper>
     <ActiveStream>{props.children}</ActiveStream>
-    <ActiveStreamActions>
+    <StreamActions>
       <Tooltip id="tooltip-top-start" title="Stop stream" placement="right">
         <IconButton aria-label="Stop" style={{ color: "white" }}>
           <StopIcon />
         </IconButton>
       </Tooltip>
-    </ActiveStreamActions>
+    </StreamActions>
   </ActiveStreamWrapper>
 );
 
