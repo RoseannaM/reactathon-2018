@@ -415,7 +415,7 @@ exports.handler = function(event, context, cb) {
       }, function (response, callback) {
         if (!access_token && (!response || !response[0] || !response[0].token)) {
           var headers = graphqlHeaders;
-          headers.Location = 'https://www.eventbrite.com/oauth/authorize?response_type=code&client_id=' + eventbrite_client_token
+          headers.Location = 'https://www.eventbrite.com/oauth/authorize?response_type=token&client_id=' + eventbrite_client_token
 
           return cb(null, {
             isBase64Encoded: false,
