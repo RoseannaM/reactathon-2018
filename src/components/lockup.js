@@ -6,6 +6,7 @@ const Wrapper = styled.div`
   font-size: 1.5em;
   display: inline-flex;
   align-items: center;
+  font-weight: 400;
 `;
 
 const Icon = styled.div`

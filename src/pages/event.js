@@ -15,7 +15,7 @@ import netlifyIdentity from "netlify-identity-widget";
 import Menu, { MenuItem } from "material-ui/Menu";
 import { BroadcastActions } from "../components/broadcast-actions";
 import rabbit from "../images/rabbit.svg";
-import { Subtitle } from "../components/typography";
+import { Subtitle, Large } from "../components/typography";
 
 const Black = styled.div`
   margin: 0;
@@ -30,12 +30,10 @@ const Center = styled.div`
   justify-content: center;
 `;
 
-const ImageWrapper = styled.div`
-  margin: 20px 0;
-`;
-const ImageCaption = styled.div`
-  text-align: center;
-`;
+const ImageWrapper = styled.div`margin: 20px 0;`;
+const ImageCaption = styled.div`text-align: center;`;
+
+const Metadata = styled.div`width: 800px;`;
 
 export class EventImpl extends Component {
   state = {
@@ -87,6 +85,10 @@ export class EventImpl extends Component {
 
     return event.session && event.session.accessToken ? (
       <React.Fragment>
+        <Metadata>
+          <Subtitle>{event.title}</Subtitle>
+          <Large>{event.description}</Large>
+        </Metadata>
         {!event.stream ? (
           <div>
             <ImageWrapper>
