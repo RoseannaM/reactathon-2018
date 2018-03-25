@@ -38,6 +38,9 @@ function getEventbriteUser(userToken, callback) {
   request({
     url: 'https://www.eventbriteapi.com/v3/users/me',
     method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    },
     qs: {
       token:userToken
     }
