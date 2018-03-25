@@ -296,16 +296,16 @@ var root = {
     // });
   },
   joinedEvents: function ({}, context) {
-    return new Promise(function (resolve) {
+    return new Promise(function (resolve, reject) {
       async.waterfall([
         function (callback) {
           // getEventbriteInfo(context.userToken, '/users/' + context.currentUserId + '/orders', {}, callback)
         // }, function (response, callback) {
-          resolve(null, [{
+          resolve([{
             id: '1234',
             title: 'dummy'
           }]);
-        }], function (error) { resolve(error) });
+        }], function (error) { reject(error) });
     });
   },
   event: function ({id}, context) {
