@@ -63,9 +63,9 @@ const ActiveStreamActions = styled.div`
   }
 `;
 
-export const ActiveStreamCard = () => (
+export const ActiveStreamCard = props => (
   <ActiveStreamWrapper>
-    <ActiveStream />
+    <ActiveStream>{props.children}</ActiveStream>
     <ActiveStreamActions>X</ActiveStreamActions>
   </ActiveStreamWrapper>
 );

@@ -14,6 +14,8 @@ type Mutation {
 type Event {
   id: ID!
   title: String!
+  startingTime: String!
+  description: String!
   session: Session
 }
 
