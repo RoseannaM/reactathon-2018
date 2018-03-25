@@ -1,5 +1,5 @@
-mutation requestToStream($eventId: ID!, $userId: ID!) {
-  requestToStream(eventId: $eventId, userId: $userId) {
+mutation requestToStream($id: ID!) {
+  requestToStream(id: $id) {
     cameraSession {
       id
     }
