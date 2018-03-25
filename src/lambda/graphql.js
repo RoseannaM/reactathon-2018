@@ -24,7 +24,8 @@ var openTokClient = new OpenTok(opentokApiKey, opentokApiSecret);
 var graphqlHeaders = {
   'Access-Control-Allow-Origin': 'http://localhost:3000',
   'Access-Control-Allow-Methods': 'POST,GET',
-  'Access-Control-Allow-Credentials': 'true'
+  'Access-Control-Allow-Credentials': 'true',
+  'Access-Control-Request-Headers': 'Content-Type'
 };
 
 function dbRequest(reqBody, callback) {
