@@ -30,16 +30,10 @@ const Center = styled.div`
   justify-content: center;
 `;
 
-const ImageWrapper = styled.div`
-  margin: 20px 0;
-`;
-const ImageCaption = styled.div`
-  text-align: center;
-`;
+const ImageWrapper = styled.div`margin: 20px 0;`;
+const ImageCaption = styled.div`text-align: center;`;
 
-const Metadata = styled.div`
-  width: 800px;
-`;
+const Metadata = styled.div`width: 800px;`;
 
 export class EventImpl extends Component {
   state = {
