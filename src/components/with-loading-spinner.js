@@ -29,9 +29,9 @@ export default Component =>
 
     componentDidMount() {
       window.setInterval(() => {
-        this.setState(() => ({
-          frame: (this.state.frame + 1) % 2
-        }));
+        // this.setState(() => ({
+        //   frame: (this.state.frame + 1) % 2
+        // }));
       }, 500);
     }
 
