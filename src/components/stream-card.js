@@ -41,7 +41,7 @@ export const StagedStreamCard = props => (
     <StreamActions>
       <Tooltip id="tooltip-top-start" title="Promote stream" placement="right">
         <IconButton
-          onClick={this.props.onPromote()}
+          onClick={props.onPromote()}
           aria-label="Promote"
           style={{ color: "white" }}
         >
