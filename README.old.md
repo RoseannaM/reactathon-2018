@@ -1,1 +1,0 @@
-# reactathon-2018
